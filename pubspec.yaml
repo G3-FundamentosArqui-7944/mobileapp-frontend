@@ -1,0 +1,40 @@
+name: bodymatchai_flutter
+description: "BodyMatch AI - intelligent fitness platform connecting athletes with coaches"
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.9.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+  intl: ^0.19.0
+  shared_preferences: ^2.5.3
+  image_picker: ^1.2.1
+
+  http: ^1.6.0
+  http_parser: ^4.0.2
+
+  flutter_secure_storage: ^9.2.4
+
+  equatable: ^2.0.7
+  provider: ^6.1.5+1
+  bloc: ^9.1.0
+  flutter_bloc: ^9.1.1
+
+  json_annotation: ^4.8.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  build_runner: ^2.4.6
+  json_serializable: ^6.7.1
+
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
