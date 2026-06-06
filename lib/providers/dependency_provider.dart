@@ -32,13 +32,13 @@ class MonolithApiClient extends ApiClient {
 
 /// Composición de dependencias raíz.
 ///
-/// El front habla con dos backends:
-/// - **Microservicios (gateway :8080)** → autenticación (IAM) y videos.
-/// - **Monolito (:8091)** → profiles, coaches, connection-requests,
-///   training-sessions, training, nutrition y membership.
+/// Todos los repositorios resuelven contra el gateway de microservicios
+/// (`:8080`), que rutea por `Path` a cada servicio (`iam-service`,
+/// `matchmaking-service`, `membership-service`, `nutrition-service`,
+/// `training-service`, `videos-service`).
 ///
-/// Ambos clientes comparten el mismo [TokenManager], y el refresh-token
-/// siempre viaja al IAM (microservicios) porque ahí se persisten.
+/// El [MonolithApiClient] se mantiene declarado por compatibilidad histórica,
+/// pero ya no tiene consumidores.
 class DependencyProvider extends StatelessWidget {
   final Widget child;
 
@@ -62,34 +62,42 @@ class DependencyProvider extends StatelessWidget {
           dispose: (_, client) => client.dispose(),
         ),
 
-        // ───── Repositorios de microservicios (IAM + Videos) ─────
+        // ───── IAM ─────
         ProxyProvider2<MicroservicesApiClient, TokenManager, AuthRepository>(
           update: (_, api, tokens, __) => AuthRepository(api: api, tokens: tokens),
         ),
+
+        // ───── Videos ─────
         ProxyProvider<MicroservicesApiClient, VideosRepository>(
           update: (_, api, __) => VideosRepository(api: api),
         ),
 
-        // ───── Repositorios del monolito ─────
-        ProxyProvider<MonolithApiClient, ProfilesRepository>(
+        // ───── Matchmaking (athletes / coaches / connections / sessions) ─────
+        ProxyProvider<MicroservicesApiClient, ProfilesRepository>(
           update: (_, api, __) => ProfilesRepository(api: api),
         ),
-        ProxyProvider<MonolithApiClient, CoachesRepository>(
+        ProxyProvider<MicroservicesApiClient, CoachesRepository>(
           update: (_, api, __) => CoachesRepository(api: api),
         ),
-        ProxyProvider<MonolithApiClient, ConnectionRequestsRepository>(
+        ProxyProvider<MicroservicesApiClient, ConnectionRequestsRepository>(
           update: (_, api, __) => ConnectionRequestsRepository(api: api),
         ),
-        ProxyProvider<MonolithApiClient, TrainingSessionsRepository>(
+        ProxyProvider<MicroservicesApiClient, TrainingSessionsRepository>(
           update: (_, api, __) => TrainingSessionsRepository(api: api),
         ),
-        ProxyProvider<MonolithApiClient, TrainingRepository>(
+
+        // ───── Training ─────
+        ProxyProvider<MicroservicesApiClient, TrainingRepository>(
           update: (_, api, __) => TrainingRepository(api: api),
         ),
-        ProxyProvider<MonolithApiClient, NutritionRepository>(
+
+        // ───── Nutrition ─────
+        ProxyProvider<MicroservicesApiClient, NutritionRepository>(
           update: (_, api, __) => NutritionRepository(api: api),
         ),
-        ProxyProvider<MonolithApiClient, MembershipRepository>(
+
+        // ───── Membership ─────
+        ProxyProvider<MicroservicesApiClient, MembershipRepository>(
           update: (_, api, __) => MembershipRepository(api: api),
         ),
       ],

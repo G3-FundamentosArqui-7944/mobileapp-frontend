@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../bloc/auth/auth_bloc.dart';
 import '../../constants/app_colors.dart';
-import '../home/home_view.dart';
+import '../onboarding/profile_onboarding_view.dart';
 
 class SignUpView extends StatefulWidget {
   /// true para crear como coach, false para atleta.
@@ -55,8 +55,11 @@ class _SignUpViewState extends State<SignUpView> {
     return BlocConsumer<AuthBloc, AuthState>(
       listener: (context, state) {
         if (state is AuthAuthenticated) {
+          // Después del sign-up el AuthBloc dispara un auto sign-in que
+          // termina en AuthAuthenticated. Encadenamos el onboarding de
+          // perfil (atleta/coach) antes de llegar al Home.
           Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(builder: (_) => HomeView(user: state.user)),
+            MaterialPageRoute(builder: (_) => ProfileOnboardingView(user: state.user)),
             (_) => false,
           );
         } else if (state is AuthFailure) {

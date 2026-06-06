@@ -7,6 +7,10 @@ import '../../data/models/training_models.dart';
 import '../../data/repositories/training_repository.dart';
 import '../common/async_view.dart';
 import '../common/section_header.dart';
+import '../matchmaking/coach_search_view.dart';
+import '../nutrition/nutrition_view.dart';
+import '../videos/video_analysis_view.dart';
+import 'workout_list_view.dart';
 
 /// Dashboard del atleta: analytics + accesos rápidos a sus features.
 class AthleteHomeView extends StatefulWidget {
@@ -65,22 +69,40 @@ class _AthleteHomeViewState extends State<AthleteHomeView> {
             subtitle: 'Las acciones que más usas',
           ),
           _ShortcutTile(
-            icon: Icons.videocam_rounded,
+            icon: Icons.fitness_center_rounded,
             color: AppColors.primary,
+            title: 'Mis entrenamientos',
+            subtitle: 'Inicia una sesión y registra tus ejercicios',
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => WorkoutListView(userId: widget.user.id)),
+            ),
+          ),
+          _ShortcutTile(
+            icon: Icons.videocam_rounded,
+            color: AppColors.accent,
             title: 'Subir un video',
             subtitle: 'Recibe feedback técnico de IA',
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => VideoAnalysisView(userId: widget.user.id)),
+            ),
           ),
           _ShortcutTile(
             icon: Icons.restaurant_rounded,
-            color: AppColors.accent,
+            color: AppColors.warning,
             title: 'Registrar comida',
             subtitle: 'Foto del plato → calorías y macros',
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => NutritionView(userId: widget.user.id)),
+            ),
           ),
           _ShortcutTile(
             icon: Icons.search_rounded,
             color: AppColors.coachAccent,
             title: 'Encontrar coach',
             subtitle: 'Filtra por especialidad y precio',
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => CoachSearchView(athleteId: widget.user.id)),
+            ),
           ),
         ],
       ),
@@ -187,11 +209,13 @@ class _ShortcutTile extends StatelessWidget {
   final Color color;
   final String title;
   final String subtitle;
+  final VoidCallback onTap;
   const _ShortcutTile({
     required this.icon,
     required this.color,
     required this.title,
     required this.subtitle,
+    required this.onTap,
   });
 
   @override
@@ -199,6 +223,7 @@ class _ShortcutTile extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.only(bottom: 10),
       child: ListTile(
+        onTap: onTap,
         leading: CircleAvatar(
           backgroundColor: color.withValues(alpha: 0.15),
           child: Icon(icon, color: color),
