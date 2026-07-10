@@ -5,6 +5,7 @@ import '../../constants/app_colors.dart';
 import '../../data/api/api_client.dart';
 import '../../data/models/matchmaking_models.dart';
 import '../../data/repositories/connection_requests_repository.dart';
+import '../../l10n/generated/app_localizations.dart';
 import '../common/async_view.dart';
 
 /// Coach: clientes activos + solicitudes pendientes (aprobar / rechazar).
@@ -30,6 +31,7 @@ class _CoachClientsViewState extends State<CoachClientsView> {
   }
 
   Future<void> _respond(ConnectionRequest r, bool approve) async {
+    final l10n = AppLocalizations.of(context)!;
     try {
       await context.read<ConnectionRequestsRepository>().respond(
             r.id,
@@ -38,7 +40,9 @@ class _CoachClientsViewState extends State<CoachClientsView> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(approve ? 'Cliente aceptado' : 'Solicitud rechazada'),
+          content: Text(approve
+              ? l10n.coachClients_clientAccepted
+              : l10n.coachClients_requestRejected),
         ),
       );
       setState(_load);
@@ -52,6 +56,7 @@ class _CoachClientsViewState extends State<CoachClientsView> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return RefreshIndicator(
       onRefresh: () async => setState(_load),
       child: AsyncView<List<ConnectionRequest>>(
@@ -59,10 +64,10 @@ class _CoachClientsViewState extends State<CoachClientsView> {
         onRetry: () => setState(_load),
         builder: (context, requests) {
           if (requests.isEmpty) {
-            return const EmptyStateView(
+            return EmptyStateView(
               icon: Icons.group_add_outlined,
-              title: 'Aún no tienes clientes',
-              subtitle: 'Cuando un atleta te solicite, aparecerá aquí.',
+              title: l10n.coachClients_emptyTitle,
+              subtitle: l10n.coachClients_emptySubtitle,
             );
           }
           final pending = requests.where((r) => r.status == 'PENDING').toList();
@@ -71,9 +76,9 @@ class _CoachClientsViewState extends State<CoachClientsView> {
             padding: const EdgeInsets.all(20),
             children: [
               if (pending.isNotEmpty) ...[
-                const Text(
-                  'Solicitudes pendientes',
-                  style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
+                Text(
+                  l10n.coachClients_pendingRequestsTitle,
+                  style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
                 ),
                 const SizedBox(height: 8),
                 ...pending.map((r) => _RequestCard(
@@ -83,17 +88,17 @@ class _CoachClientsViewState extends State<CoachClientsView> {
                     )),
                 const SizedBox(height: 20),
               ],
-              const Text(
-                'Mis clientes',
-                style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
+              Text(
+                l10n.coachClients_myClientsTitle,
+                style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
               ),
               const SizedBox(height: 8),
               if (accepted.isEmpty)
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 8),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
                   child: Text(
-                    'Todavía no tienes clientes aceptados.',
-                    style: TextStyle(color: AppColors.textSecondary),
+                    l10n.coachClients_noAcceptedClients,
+                    style: const TextStyle(color: AppColors.textSecondary),
                   ),
                 )
               else
@@ -104,7 +109,7 @@ class _CoachClientsViewState extends State<CoachClientsView> {
                           backgroundColor: AppColors.athleteAccent,
                           child: Icon(Icons.person, color: Colors.white),
                         ),
-                        title: Text('Atleta #${r.athleteId}'),
+                        title: Text(l10n.coachClients_athleteLabel(r.athleteId)),
                         subtitle: r.message == null ? null : Text(r.message!),
                       ),
                     )),
@@ -129,6 +134,7 @@ class _RequestCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Card(
       margin: const EdgeInsets.only(bottom: 10),
       child: Padding(
@@ -148,7 +154,7 @@ class _RequestCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Atleta #${request.athleteId}',
+                        l10n.coachClients_athleteLabel(request.athleteId),
                         style: const TextStyle(fontWeight: FontWeight.w700),
                       ),
                       if (request.message != null && request.message!.isNotEmpty)
@@ -174,7 +180,7 @@ class _RequestCard extends StatelessWidget {
                       foregroundColor: AppColors.error,
                       side: const BorderSide(color: AppColors.error),
                     ),
-                    child: const Text('Rechazar'),
+                    child: Text(l10n.coachClients_rejectButton),
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -182,7 +188,7 @@ class _RequestCard extends StatelessWidget {
                   child: ElevatedButton(
                     onPressed: onAccept,
                     style: ElevatedButton.styleFrom(backgroundColor: AppColors.success),
-                    child: const Text('Aceptar'),
+                    child: Text(l10n.coachClients_acceptButton),
                   ),
                 ),
               ],

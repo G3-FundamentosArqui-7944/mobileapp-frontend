@@ -1,48 +1,72 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:provider/provider.dart';
 
 import 'bloc/auth/auth_bloc.dart';
 import 'constants/app_colors.dart';
 import 'data/repositories/auth_repository.dart';
+import 'l10n/generated/app_localizations.dart';
 import 'providers/dependency_provider.dart';
+import 'providers/locale_controller.dart';
 import 'views/auth/splash_view.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await initializeDateFormatting('en_US', null);
   await initializeDateFormatting('es_PE', null);
+
+  final localeController = LocaleController();
+  await localeController.loadSaved();
+
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
     statusBarColor: Colors.transparent,
     statusBarIconBrightness: Brightness.dark,
   ));
-  runApp(const BodyMatchApp());
+  runApp(BodyMatchApp(localeController: localeController));
 }
 
 class BodyMatchApp extends StatelessWidget {
-  const BodyMatchApp({super.key});
+  final LocaleController localeController;
+  const BodyMatchApp({super.key, required this.localeController});
 
   @override
   Widget build(BuildContext context) {
-    return DependencyProvider(
-      child: Builder(
-        builder: (context) {
-          return BlocProvider<AuthBloc>(
-            create: (_) => AuthBloc(
-              repository: context.read<AuthRepository>(),
-              apiClients: [
-                context.read<MicroservicesApiClient>(),
-                context.read<MonolithApiClient>(),
-              ],
-            )..add(const AuthInitialized()),
-            child: MaterialApp(
-              title: 'BodyMatch',
-              debugShowCheckedModeBanner: false,
-              theme: _buildTheme(),
-              home: const SplashView(),
-            ),
-          );
-        },
+    return ChangeNotifierProvider<LocaleController>.value(
+      value: localeController,
+      child: DependencyProvider(
+        child: Builder(
+          builder: (context) {
+            return BlocProvider<AuthBloc>(
+              create: (_) => AuthBloc(
+                repository: context.read<AuthRepository>(),
+                apiClients: [
+                  context.read<MicroservicesApiClient>(),
+                  context.read<MonolithApiClient>(),
+                ],
+                localeController: context.read<LocaleController>(),
+              )..add(const AuthInitialized()),
+              child: Consumer<LocaleController>(
+                builder: (context, locale, _) => MaterialApp(
+                  title: 'BodyMatch',
+                  debugShowCheckedModeBanner: false,
+                  theme: _buildTheme(),
+                  locale: locale.locale,
+                  supportedLocales: LocaleController.supportedLocales,
+                  localizationsDelegates: const [
+                    AppLocalizations.delegate,
+                    GlobalMaterialLocalizations.delegate,
+                    GlobalWidgetsLocalizations.delegate,
+                    GlobalCupertinoLocalizations.delegate,
+                  ],
+                  home: const SplashView(),
+                ),
+              ),
+            );
+          },
+        ),
       ),
     );
   }

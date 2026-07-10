@@ -6,6 +6,7 @@ import '../../data/api/api_client.dart';
 import '../../data/models/auth_models.dart';
 import '../../data/models/matchmaking_models.dart';
 import '../../data/repositories/profiles_repository.dart';
+import '../../l10n/generated/app_localizations.dart';
 import '../home/home_view.dart';
 import '../matchmaking/coach_search_view.dart';
 
@@ -76,7 +77,7 @@ class _ProfileOnboardingViewState extends State<ProfileOnboardingView> {
           : await repo.getAthleteByUserId(widget.user.id);
       if (!mounted) return;
       if (existing != null) {
-        _goHome(message: 'Tu perfil ya estaba guardado');
+        _goHome(message: AppLocalizations.of(context)!.profileOnboarding_profileAlreadySaved);
         return;
       }
     } on ApiException {
@@ -105,18 +106,19 @@ class _ProfileOnboardingViewState extends State<ProfileOnboardingView> {
   }
 
   Future<void> _save() async {
+    final l10n = AppLocalizations.of(context)!;
     final asCoach = widget.user.isCoach && !widget.user.isAthlete;
     if (asCoach) {
       if (_specialties.isEmpty) {
-        _snack('Selecciona al menos una especialidad');
+        _snack(l10n.profileOnboarding_selectSpecialty);
         return;
       }
       final years = int.tryParse(_yearsCtrl.text);
       final rate = num.tryParse(_rateCtrl.text);
-      if (years == null || years < 0) return _snack('Años de experiencia inválidos');
-      if (rate == null || rate < 0) return _snack('Tarifa inválida');
+      if (years == null || years < 0) return _snack(l10n.profileOnboarding_invalidYears);
+      if (rate == null || rate < 0) return _snack(l10n.profileOnboarding_invalidRate);
     } else {
-      if (_goals.isEmpty) return _snack('Selecciona al menos una meta');
+      if (_goals.isEmpty) return _snack(l10n.profileOnboarding_selectGoal);
     }
 
     setState(() => _saving = true);
@@ -145,7 +147,7 @@ class _ProfileOnboardingViewState extends State<ProfileOnboardingView> {
       // 409 = el backend ya tenía el perfil (típicamente cuando un POST previo
       // sí persistió pero el cliente timeouteó esperando la respuesta).
       if (e.statusCode == 409 && mounted) {
-        _goHome(message: 'Tu perfil ya estaba guardado');
+        _goHome(message: l10n.profileOnboarding_profileAlreadySaved);
         return;
       }
       _snack(e.message);
@@ -162,6 +164,7 @@ class _ProfileOnboardingViewState extends State<ProfileOnboardingView> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final asCoach = widget.user.isCoach && !widget.user.isAthlete;
     if (_checking) {
       return const Scaffold(
@@ -170,7 +173,7 @@ class _ProfileOnboardingViewState extends State<ProfileOnboardingView> {
     }
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Tu perfil'),
+        title: Text(l10n.profileOnboarding_appBarTitle),
         automaticallyImplyLeading: false,
       ),
       body: SafeArea(
@@ -178,7 +181,9 @@ class _ProfileOnboardingViewState extends State<ProfileOnboardingView> {
           padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
           children: [
             Text(
-              asCoach ? 'Cuéntanos cómo entrenas' : '¿Cuál es tu meta?',
+              asCoach
+                  ? l10n.profileOnboarding_coachHeading
+                  : l10n.profileOnboarding_athleteHeading,
               style: const TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.w800,
@@ -188,12 +193,12 @@ class _ProfileOnboardingViewState extends State<ProfileOnboardingView> {
             const SizedBox(height: 6),
             Text(
               asCoach
-                  ? 'Esto ayuda a los atletas a encontrarte cuando filtran por especialidad y precio.'
-                  : 'Esto define las recomendaciones de coach y rutinas que te sugiramos.',
+                  ? l10n.profileOnboarding_coachSubtitle
+                  : l10n.profileOnboarding_athleteSubtitle,
               style: const TextStyle(color: AppColors.textSecondary, fontSize: 14),
             ),
             const SizedBox(height: 20),
-            asCoach ? _coachForm() : _athleteForm(),
+            asCoach ? _coachForm(l10n) : _athleteForm(l10n),
             const SizedBox(height: 28),
             ElevatedButton(
               onPressed: _saving ? null : _save,
@@ -203,7 +208,7 @@ class _ProfileOnboardingViewState extends State<ProfileOnboardingView> {
                       height: 22,
                       child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.4),
                     )
-                  : const Text('Continuar'),
+                  : Text(l10n.profileOnboarding_continueButton),
             ),
           ],
         ),
@@ -211,24 +216,24 @@ class _ProfileOnboardingViewState extends State<ProfileOnboardingView> {
     );
   }
 
-  Widget _athleteForm() {
+  Widget _athleteForm(AppLocalizations l10n) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const _Label('Nivel de entrenamiento'),
+        _Label(l10n.profileOnboarding_trainingLevelLabel),
         const SizedBox(height: 8),
         Wrap(
           spacing: 8,
           children: _kTrainingLevels.map((level) {
             return ChoiceChip(
-              label: Text(_trainingLevelLabel(level)),
+              label: Text(_trainingLevelLabel(l10n, level)),
               selected: _trainingLevel == level,
               onSelected: (_) => setState(() => _trainingLevel = level),
             );
           }).toList(),
         ),
         const SizedBox(height: 20),
-        const _Label('Metas (elige una o más)'),
+        _Label(l10n.profileOnboarding_goalsLabel),
         const SizedBox(height: 8),
         Wrap(
           spacing: 8,
@@ -236,7 +241,7 @@ class _ProfileOnboardingViewState extends State<ProfileOnboardingView> {
           children: _kGoals.map((g) {
             final selected = _goals.contains(g);
             return FilterChip(
-              label: Text(_goalLabel(g)),
+              label: Text(_goalLabel(l10n, g)),
               selected: selected,
               onSelected: (v) => setState(() {
                 if (v) {
@@ -249,24 +254,24 @@ class _ProfileOnboardingViewState extends State<ProfileOnboardingView> {
           }).toList(),
         ),
         const SizedBox(height: 20),
-        const _Label('Preferencias (opcional)'),
+        _Label(l10n.profileOnboarding_preferencesLabel),
         const SizedBox(height: 8),
         TextFormField(
           controller: _preferencesCtrl,
           maxLines: 3,
-          decoration: const InputDecoration(
-            hintText: 'Por ejemplo: prefiero entrenar mañanas, gym sin máquinas...',
+          decoration: InputDecoration(
+            hintText: l10n.profileOnboarding_preferencesHint,
           ),
         ),
       ],
     );
   }
 
-  Widget _coachForm() {
+  Widget _coachForm(AppLocalizations l10n) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const _Label('Especialidades'),
+        _Label(l10n.profileOnboarding_specialtiesLabel),
         const SizedBox(height: 8),
         Wrap(
           spacing: 8,
@@ -274,7 +279,7 @@ class _ProfileOnboardingViewState extends State<ProfileOnboardingView> {
           children: _kSpecialties.map((s) {
             final selected = _specialties.contains(s);
             return FilterChip(
-              label: Text(specialtyLabel(s)),
+              label: Text(specialtyLabel(l10n, s)),
               selected: selected,
               onSelected: (v) => setState(() {
                 if (v) {
@@ -293,7 +298,8 @@ class _ProfileOnboardingViewState extends State<ProfileOnboardingView> {
               child: TextFormField(
                 controller: _yearsCtrl,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(labelText: 'Años de experiencia'),
+                decoration:
+                    InputDecoration(labelText: l10n.profileOnboarding_yearsExperienceLabel),
               ),
             ),
             const SizedBox(width: 12),
@@ -301,15 +307,18 @@ class _ProfileOnboardingViewState extends State<ProfileOnboardingView> {
               child: TextFormField(
                 controller: _rateCtrl,
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                decoration: const InputDecoration(labelText: 'Tarifa por hora'),
+                decoration: InputDecoration(labelText: l10n.profileOnboarding_hourlyRateLabel),
               ),
             ),
             const SizedBox(width: 12),
             SizedBox(
-              width: 88,
+              width: 112,
               child: DropdownButtonFormField<String>(
                 initialValue: _currency,
-                decoration: const InputDecoration(labelText: 'Moneda'),
+                decoration: InputDecoration(
+                  labelText: l10n.profileOnboarding_currencyLabel,
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 16),
+                ),
                 items: const [
                   DropdownMenuItem(value: 'PEN', child: Text('PEN')),
                   DropdownMenuItem(value: 'USD', child: Text('USD')),
@@ -320,50 +329,50 @@ class _ProfileOnboardingViewState extends State<ProfileOnboardingView> {
           ],
         ),
         const SizedBox(height: 16),
-        const _Label('Biografía (opcional)'),
+        _Label(l10n.profileOnboarding_bioLabel),
         const SizedBox(height: 8),
         TextFormField(
           controller: _bioCtrl,
           maxLines: 4,
-          decoration: const InputDecoration(
-            hintText: 'Cuenta tu enfoque, certificaciones, atletas con los que has trabajado...',
+          decoration: InputDecoration(
+            hintText: l10n.profileOnboarding_bioHint,
           ),
         ),
       ],
     );
   }
 
-  String _trainingLevelLabel(String l) {
+  String _trainingLevelLabel(AppLocalizations l10n, String l) {
     switch (l) {
       case 'BEGINNER':
-        return 'Principiante';
+        return l10n.trainingLevel_beginner;
       case 'INTERMEDIATE':
-        return 'Intermedio';
+        return l10n.trainingLevel_intermediate;
       case 'ADVANCED':
-        return 'Avanzado';
+        return l10n.trainingLevel_advanced;
       case 'ELITE':
-        return 'Élite';
+        return l10n.trainingLevel_elite;
       default:
         return l;
     }
   }
 
-  String _goalLabel(String g) {
+  String _goalLabel(AppLocalizations l10n, String g) {
     switch (g) {
       case 'WEIGHT_LOSS':
-        return 'Bajar de peso';
+        return l10n.goal_weightLoss;
       case 'MUSCLE_GAIN':
-        return 'Ganar músculo';
+        return l10n.goal_muscleGain;
       case 'STRENGTH':
-        return 'Fuerza';
+        return l10n.goal_strength;
       case 'ENDURANCE':
-        return 'Resistencia';
+        return l10n.goal_endurance;
       case 'MOBILITY':
-        return 'Movilidad';
+        return l10n.goal_mobility;
       case 'GENERAL_FITNESS':
-        return 'Estado general';
+        return l10n.goal_generalFitness;
       case 'COMPETITION_PREP':
-        return 'Competencia';
+        return l10n.goal_competitionPrep;
       default:
         return g;
     }

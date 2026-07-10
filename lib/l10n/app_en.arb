@@ -1,0 +1,416 @@
+{
+  "@@locale": "en",
+
+  "apiError_badRequest": "Invalid request",
+  "apiError_unauthorized": "Not authorized",
+  "apiError_forbidden": "Access denied",
+  "apiError_notFound": "Resource not found",
+  "apiError_conflict": "Conflict with current state",
+  "apiError_serverError": "Internal server error",
+  "apiError_serviceUnavailable": "Service unavailable",
+  "apiError_httpGeneric": "HTTP error {code}",
+  "@apiError_httpGeneric": {
+    "placeholders": { "code": { "type": "int" } }
+  },
+  "apiError_noConnection": "No connection",
+  "apiError_timeout": "The request took too long",
+  "apiError_sessionExpired": "Session expired",
+
+  "auth_sessionExpired": "Your session expired. Please sign in again.",
+  "auth_invalidData": "Invalid data. Please check your information.",
+  "auth_invalidCredentials": "Incorrect credentials.",
+  "auth_accountNotFound": "We couldn't find an account with that email.",
+  "auth_emailAlreadyRegistered": "That email is already registered.",
+
+  "common_cancel": "Cancel",
+  "common_couldNotLoad": "We couldn't load the information",
+  "common_retry": "Retry",
+  "common_emailLabel": "Email",
+  "common_passwordLabel": "Password",
+  "common_emailRequired": "Enter your email",
+  "common_emailInvalid": "Invalid email",
+  "common_requiredField": "Required",
+
+  "splash_tagline": "AI fitness coaching",
+
+  "roleSelector_appBarTitle": "Choose how you join",
+  "roleSelector_heading": "Who are you in BodyMatch?",
+  "roleSelector_subtitle": "Your role defines your experience. You can change it later.",
+  "roleSelector_athleteTitle": "I'm an athlete",
+  "roleSelector_athleteDescription": "I want to train, get AI feedback, find coaches and track my nutrition.",
+  "roleSelector_coachTitle": "I'm a coach",
+  "roleSelector_coachDescription": "I want to offer my services, manage clients and schedule training sessions.",
+
+  "signIn_welcomeBack": "Welcome back",
+  "signIn_subtitle": "Sign in to your account to keep training.",
+  "signIn_passwordRequired": "Enter your password",
+  "signIn_passwordMinLength": "Minimum 6 characters",
+  "signIn_submitButton": "Sign in",
+  "signIn_noAccountPrompt": "Don't have an account? ",
+  "signIn_signUpLink": "Sign up",
+
+  "signUp_roleAthlete": "athlete",
+  "signUp_roleCoach": "coach",
+  "signUp_appBarTitle": "{role} sign up",
+  "@signUp_appBarTitle": {
+    "placeholders": { "role": { "type": "String" } }
+  },
+  "signUp_heading": "Create your {role} account",
+  "@signUp_heading": {
+    "placeholders": { "role": { "type": "String" } }
+  },
+  "signUp_firstNameLabel": "First name",
+  "signUp_lastNameLabel": "Last name",
+  "signUp_phoneLabel": "Phone (optional)",
+  "signUp_passwordRequired": "Enter a password",
+  "signUp_passwordMinLength": "Minimum 8 characters",
+  "signUp_passwordNeedsUppercase": "Must include an uppercase letter",
+  "signUp_passwordNeedsNumber": "Must include a number",
+  "signUp_confirmPasswordLabel": "Confirm password",
+  "signUp_passwordMismatch": "Passwords don't match",
+  "signUp_submitButton": "Create account",
+
+  "trainingLevel_beginner": "Beginner",
+  "trainingLevel_intermediate": "Intermediate",
+  "trainingLevel_advanced": "Advanced",
+  "trainingLevel_elite": "Elite",
+
+  "goal_weightLoss": "Lose weight",
+  "goal_muscleGain": "Gain muscle",
+  "goal_strength": "Strength",
+  "goal_endurance": "Endurance",
+  "goal_mobility": "Mobility",
+  "goal_generalFitness": "General fitness",
+  "goal_competitionPrep": "Competition prep",
+
+  "specialty_strengthTraining": "Strength training",
+  "specialty_bodybuilding": "Bodybuilding",
+  "specialty_powerlifting": "Powerlifting",
+  "specialty_calisthenics": "Calisthenics",
+  "specialty_crossfit": "CrossFit",
+  "specialty_yoga": "Yoga",
+  "specialty_mobility": "Mobility",
+  "specialty_nutritionCoaching": "Nutrition coaching",
+  "specialty_cardio": "Cardio",
+  "specialty_hiit": "HIIT",
+
+  "profileOnboarding_profileAlreadySaved": "Your profile was already saved",
+  "profileOnboarding_selectSpecialty": "Select at least one specialty",
+  "profileOnboarding_invalidYears": "Invalid years of experience",
+  "profileOnboarding_invalidRate": "Invalid rate",
+  "profileOnboarding_selectGoal": "Select at least one goal",
+  "profileOnboarding_appBarTitle": "Your profile",
+  "profileOnboarding_coachHeading": "Tell us how you train",
+  "profileOnboarding_athleteHeading": "What's your goal?",
+  "profileOnboarding_coachSubtitle": "This helps athletes find you when they filter by specialty and price.",
+  "profileOnboarding_athleteSubtitle": "This drives the coach and routine recommendations we suggest for you.",
+  "profileOnboarding_continueButton": "Continue",
+  "profileOnboarding_trainingLevelLabel": "Training level",
+  "profileOnboarding_goalsLabel": "Goals (choose one or more)",
+  "profileOnboarding_preferencesLabel": "Preferences (optional)",
+  "profileOnboarding_preferencesHint": "E.g.: I prefer training mornings, gym without machines...",
+  "profileOnboarding_specialtiesLabel": "Specialties",
+  "profileOnboarding_yearsExperienceLabel": "Years of experience",
+  "profileOnboarding_hourlyRateLabel": "Hourly rate",
+  "profileOnboarding_currencyLabel": "Currency",
+  "profileOnboarding_bioLabel": "Biography (optional)",
+  "profileOnboarding_bioHint": "Tell us your approach, certifications, athletes you've worked with...",
+
+  "home_tabHome": "Home",
+  "home_tabCoaches": "Coaches",
+  "home_tabAiAnalysis": "AI Analysis",
+  "home_tabNutrition": "Nutrition",
+  "home_tabProfile": "Profile",
+  "home_tabClients": "Clients",
+  "home_tabAgenda": "Agenda",
+  "home_tabMessages": "Messages",
+
+  "coachHome_greeting": "Hi, {firstName} 👋",
+  "@coachHome_greeting": {
+    "placeholders": { "firstName": { "type": "String" } }
+  },
+  "coachHome_defaultName": "coach",
+  "coachHome_subtitle": "Your day as a coach.",
+  "coachHome_activeClients": "Active clients",
+  "coachHome_requests": "Requests",
+  "coachHome_upcomingSessions": "Upcoming sessions",
+  "coachHome_nextSessionSection": "Next session",
+  "coachHome_noSessionsScheduled": "You have no scheduled sessions.",
+  "coachHome_athleteSessionInfo": "Athlete #{athleteId} · {minutes} min",
+  "@coachHome_athleteSessionInfo": {
+    "placeholders": {
+      "athleteId": { "type": "int" },
+      "minutes": { "type": "int" }
+    }
+  },
+
+  "workoutList_appBarTitle": "My workouts",
+  "workoutList_newDialogTitle": "New workout",
+  "workoutList_titleLabel": "Title",
+  "workoutList_titleHint": "E.g. Chest and triceps",
+  "workoutList_startButton": "Start",
+  "workoutList_emptyTitle": "You haven't logged any workouts yet",
+  "workoutList_emptySubtitle": "Tap the + button to start your first session.",
+  "workoutList_exercisesCount": "{count, plural, one{{count} exercise} other{{count} exercises}}",
+  "@workoutList_exercisesCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "workoutList_volumeLabel": "volume",
+
+  "workoutSession_appBarTitle": "Session",
+  "workoutSession_completeDialogTitle": "Complete workout",
+  "workoutSession_completeDialogMessage": "This will close the session and you won't be able to add more exercises.",
+  "workoutSession_completeButton": "Complete",
+  "workoutSession_completedSnackbar": "Workout completed",
+  "workoutSession_exerciseFabLabel": "Exercise",
+  "workoutSession_exercisesSection": "Exercises",
+  "workoutSession_registeredCount": "{count} logged",
+  "@workoutSession_registeredCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "workoutSession_emptyTitle": "No exercises yet",
+  "workoutSession_emptySubtitle": "Add the first one with the + Exercise button.",
+  "workoutSession_startedAt": "Started {date}",
+  "@workoutSession_startedAt": {
+    "placeholders": { "date": { "type": "String" } }
+  },
+  "workoutSession_closedSuffix": " · closed {date}",
+  "@workoutSession_closedSuffix": {
+    "placeholders": { "date": { "type": "String" } }
+  },
+  "workoutSession_volumeStat": "Volume",
+  "workoutSession_statusCompleted": "Completed",
+  "workoutSession_statusAbandoned": "Abandoned",
+  "workoutSession_statusInProgress": "In progress",
+  "workoutSession_addExerciseTitle": "Add exercise",
+  "workoutSession_exerciseNameLabel": "Exercise name",
+  "workoutSession_exerciseNameHint": "E.g. Bench press",
+  "workoutSession_setsLabel": "Sets",
+  "workoutSession_repsLabel": "Reps",
+  "workoutSession_loadLabel": "Load (optional)",
+  "workoutSession_unitLabel": "Unit",
+  "workoutSession_durationLabel": "Duration (s)",
+  "workoutSession_restLabel": "Rest (s)",
+  "workoutSession_addButton": "Add",
+  "workoutSession_greaterThanZero": "> 0",
+
+  "coachSearch_appBarTitle": "Find a coach",
+  "coachSearch_subtitle": "Filter by specialty and price.",
+  "coachSearch_maxRateLabel": "Max hourly rate: S/ {rate}",
+  "@coachSearch_maxRateLabel": {
+    "placeholders": { "rate": { "type": "String" } }
+  },
+  "coachSearch_searchButton": "Search coaches",
+  "coachSearch_emptyTitle": "No coaches found",
+  "coachSearch_emptySubtitle": "Try widening your filters.",
+  "coachSearch_reviewsCount": "{count, plural, =0{No reviews yet} one{1 review} other{{count} reviews}}",
+  "@coachSearch_reviewsCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "coachSearch_coachIdLabel": "Coach #{id}",
+  "@coachSearch_coachIdLabel": {
+    "placeholders": { "id": { "type": "int" } }
+  },
+  "coachSearch_perHourSuffix": "/ hour",
+
+  "day_monday": "Monday",
+  "day_tuesday": "Tuesday",
+  "day_wednesday": "Wednesday",
+  "day_thursday": "Thursday",
+  "day_friday": "Friday",
+  "day_saturday": "Saturday",
+  "day_sunday": "Sunday",
+
+  "coachDetail_requestDialogTitle": "Request coaching",
+  "coachDetail_requestDialogHint": "Why do you want to train with this coach?",
+  "coachDetail_sendButton": "Send",
+  "coachDetail_requestSentSnackbar": "Request sent to the coach",
+  "coachDetail_sessionScheduledFor": "Session scheduled for {date}",
+  "@coachDetail_sessionScheduledFor": {
+    "placeholders": { "date": { "type": "String" } }
+  },
+  "coachDetail_slotUnavailable": "That time slot is no longer available.",
+  "coachDetail_yearsExperience": "{years} years of experience",
+  "@coachDetail_yearsExperience": {
+    "placeholders": { "years": { "type": "int" } }
+  },
+  "coachDetail_specialtiesTitle": "Specialties",
+  "coachDetail_availabilityTitle": "Availability",
+  "coachDetail_noAvailabilityPublished": "The coach hasn't published a schedule yet.",
+  "coachDetail_requestCoachingButton": "Request coaching",
+  "coachDetail_scheduleSessionButton": "Schedule session",
+
+  "coachAgenda_availabilityAdded": "Availability added",
+  "coachAgenda_sessionClosed": "Session closed",
+  "coachAgenda_fabLabel": "Availability",
+  "coachAgenda_weeklyAvailabilityTitle": "Weekly availability",
+  "coachAgenda_noAvailabilityYet": "You haven't added availability yet.",
+  "coachAgenda_scheduledSessionsTitle": "Scheduled sessions",
+  "coachAgenda_addAvailabilityPrompt": "Add availability so athletes can book with you.",
+  "coachAgenda_athleteSessionInfo": "Athlete #{athleteId} · {minutes} min · {status}",
+  "@coachAgenda_athleteSessionInfo": {
+    "placeholders": {
+      "athleteId": { "type": "int" },
+      "minutes": { "type": "int" },
+      "status": { "type": "String" }
+    }
+  },
+  "coachAgenda_markCompletedTooltip": "Mark as completed",
+  "coachAgenda_newAvailabilityTitle": "New availability",
+  "coachAgenda_dayLabel": "Day",
+  "coachAgenda_startLabel": "Start: {time}",
+  "@coachAgenda_startLabel": {
+    "placeholders": { "time": { "type": "String" } }
+  },
+  "coachAgenda_endLabel": "End: {time}",
+  "@coachAgenda_endLabel": {
+    "placeholders": { "time": { "type": "String" } }
+  },
+  "coachAgenda_saveButton": "Save",
+
+  "coachClients_clientAccepted": "Client accepted",
+  "coachClients_requestRejected": "Request rejected",
+  "coachClients_emptyTitle": "You don't have any clients yet",
+  "coachClients_emptySubtitle": "When an athlete requests you, they'll appear here.",
+  "coachClients_pendingRequestsTitle": "Pending requests",
+  "coachClients_myClientsTitle": "My clients",
+  "coachClients_noAcceptedClients": "You don't have any accepted clients yet.",
+  "coachClients_athleteLabel": "Athlete #{id}",
+  "@coachClients_athleteLabel": {
+    "placeholders": { "id": { "type": "int" } }
+  },
+  "coachClients_rejectButton": "Reject",
+  "coachClients_acceptButton": "Accept",
+
+  "coachMessages_title": "Messaging coming soon",
+  "coachMessages_subtitle": "The chat module isn't enabled on the backend yet. It will be available soon.",
+
+  "nutrition_takePhoto": "Take a photo of the meal",
+  "nutrition_chooseFromGallery": "Choose from gallery",
+  "nutrition_analyzingSnackbar": "Analyzing your meal with AI…",
+  "nutrition_analyzingButton": "Analyzing…",
+  "nutrition_analyzeButton": "Analyze meal",
+  "nutrition_analyzeFailed": "Couldn't analyze the image: {error}",
+  "@nutrition_analyzeFailed": {
+    "placeholders": { "error": { "type": "String" } }
+  },
+  "nutrition_todayTitle": "Today",
+  "nutrition_activePlanSection": "Active plan",
+  "nutrition_planUntil": "Until {date}",
+  "@nutrition_planUntil": {
+    "placeholders": { "date": { "type": "String" } }
+  },
+  "nutrition_todaysMealsSection": "Today's meals",
+  "nutrition_noMealsLogged": "You haven't logged any meals yet.",
+  "nutrition_caloriesLabel": "Calories",
+  "nutrition_proteinLabel": "Protein",
+  "nutrition_carbsLabel": "Carbs",
+  "nutrition_fatLabel": "Fat",
+  "nutrition_targetLabel": "target {value}",
+  "@nutrition_targetLabel": {
+    "placeholders": { "value": { "type": "String" } }
+  },
+  "nutrition_mealBreakfast": "Breakfast",
+  "nutrition_mealLunch": "Lunch",
+  "nutrition_mealDinner": "Dinner",
+  "nutrition_mealSnack": "Snack",
+
+  "nutritionAnalysis_logMealDialogTitle": "Log as a meal",
+  "nutritionAnalysis_mealTypeLabel": "Meal type",
+  "nutritionAnalysis_mealLogged": "Meal logged",
+  "nutritionAnalysis_defaultDescription": "Meal logged from AI analysis",
+  "nutritionAnalysis_saveButton": "Save",
+  "nutritionAnalysis_appBarTitle": "Nutrition analysis",
+  "nutritionAnalysis_detectedFoodsTitle": "Detected foods",
+  "nutritionAnalysis_noFoodsDetected": "No foods were identified.",
+  "nutritionAnalysis_logMealButton": "Log as a meal",
+
+  "membership_subscribeDialogTitle": "Subscribe to {planName}",
+  "@membership_subscribeDialogTitle": {
+    "placeholders": { "planName": { "type": "String" } }
+  },
+  "membership_subscribeDialogMessage": "This will create a {period} subscription for {currency} {price}.",
+  "@membership_subscribeDialogMessage": {
+    "placeholders": {
+      "period": { "type": "String" },
+      "currency": { "type": "String" },
+      "price": { "type": "String" }
+    }
+  },
+  "membership_subscribeButton": "Subscribe",
+  "membership_subscriptionCreated": "Subscription created",
+  "membership_appBarTitle": "Membership",
+  "membership_availablePlansSection": "Available plans",
+  "membership_noActivePlans": "There are no active plans right now.",
+  "membership_activeStatus": "Active membership",
+  "membership_inactiveStatus": "No active membership",
+  "membership_planValidUntil": "Plan {planCode} · valid until {date}",
+  "@membership_planValidUntil": {
+    "placeholders": {
+      "planCode": { "type": "String" },
+      "date": { "type": "String" }
+    }
+  },
+  "membership_subscribeToPlanButton": "Subscribe to this plan",
+
+  "videoAnalysis_videoDetailsTitle": "Video details",
+  "videoAnalysis_exerciseLabel": "Exercise (e.g. Squat)",
+  "videoAnalysis_notesLabel": "Notes (optional)",
+  "videoAnalysis_uploadButton": "Upload",
+  "videoAnalysis_defaultExerciseName": "Exercise",
+  "videoAnalysis_uploadedProcessing": "Video uploaded. Processing analysis…",
+  "videoAnalysis_newVideoButton": "New video",
+  "videoAnalysis_uploadingButton": "Uploading…",
+  "videoAnalysis_emptyTitle": "No videos yet",
+  "videoAnalysis_emptySubtitle": "Upload your first video to get technical feedback.",
+  "videoAnalysis_recordWithCamera": "Record with camera",
+
+  "videoDetail_analysisFailedPrefix": "Analysis: {msg}",
+  "@videoDetail_analysisFailedPrefix": {
+    "placeholders": { "msg": { "type": "String" } }
+  },
+  "videoDetail_appBarDefaultTitle": "Video analysis",
+  "videoDetail_sizeLabel": "Size: {mb} MB",
+  "@videoDetail_sizeLabel": {
+    "placeholders": { "mb": { "type": "String" } }
+  },
+  "videoDetail_analysisCompleted": "Analysis completed",
+  "videoDetail_analysisFailedStatus": "Couldn't analyze the video",
+  "videoDetail_processingStatus": "Processing AI analysis…",
+  "videoDetail_aiResultTitle": "AI result",
+
+  "athleteHome_greeting": "Hi, {firstName} 👋",
+  "@athleteHome_greeting": {
+    "placeholders": { "firstName": { "type": "String" } }
+  },
+  "athleteHome_defaultName": "athlete",
+  "athleteHome_subtitle": "Here's your training progress.",
+  "athleteHome_shortcutsTitle": "Shortcuts",
+  "athleteHome_shortcutsSubtitle": "The actions you use most",
+  "athleteHome_uploadVideoTitle": "Upload a video",
+  "athleteHome_uploadVideoSubtitle": "Get technical AI feedback",
+  "athleteHome_logMealTitle": "Log a meal",
+  "athleteHome_logMealSubtitle": "Photo of your plate → calories and macros",
+  "athleteHome_findCoachSubtitle": "Filter by specialty and price",
+  "athleteHome_workoutsShortcutSubtitle": "Start a session and log your exercises",
+  "athleteHome_workoutsStat": "Workouts",
+  "athleteHome_completedStat": "Completed",
+  "athleteHome_totalVolumeStat": "Total volume",
+  "athleteHome_successRateStat": "Success rate",
+
+  "profile_roleCoach": "Coach",
+  "profile_roleAthlete": "Athlete",
+  "profile_membershipTitle": "Membership",
+  "profile_membershipSubtitle": "Plans, current subscription and history",
+  "profile_aboutTitle": "About BodyMatch",
+  "profile_aboutSubtitle": "Version, terms and conditions",
+  "profile_aboutLegalese": "© {year} BodyMatch AI",
+  "@profile_aboutLegalese": {
+    "placeholders": { "year": { "type": "int" } }
+  },
+  "profile_languageTitle": "Language",
+  "profile_logoutButton": "Sign out",
+  "profile_logoutConfirmTitle": "Sign out",
+  "profile_logoutConfirmMessage": "Are you sure you want to sign out of your account?",
+  "profile_logoutConfirmButton": "Sign out"
+}

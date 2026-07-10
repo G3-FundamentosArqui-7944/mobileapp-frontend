@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../constants/app_colors.dart';
 import '../../data/models/matchmaking_models.dart';
 import '../../data/repositories/coaches_repository.dart';
+import '../../l10n/generated/app_localizations.dart';
 import '../common/async_view.dart';
 import 'coach_detail_view.dart';
 
@@ -20,28 +21,28 @@ const _kAllSpecialties = <String>[
   'HIIT',
 ];
 
-String specialtyLabel(String code) {
+String specialtyLabel(AppLocalizations l10n, String code) {
   switch (code) {
     case 'STRENGTH_TRAINING':
-      return 'Fuerza';
+      return l10n.specialty_strengthTraining;
     case 'BODYBUILDING':
-      return 'Hipertrofia';
+      return l10n.specialty_bodybuilding;
     case 'POWERLIFTING':
-      return 'Powerlifting';
+      return l10n.specialty_powerlifting;
     case 'CALISTHENICS':
-      return 'Calistenia';
+      return l10n.specialty_calisthenics;
     case 'CROSSFIT':
-      return 'CrossFit';
+      return l10n.specialty_crossfit;
     case 'YOGA':
-      return 'Yoga';
+      return l10n.specialty_yoga;
     case 'MOBILITY':
-      return 'Movilidad';
+      return l10n.specialty_mobility;
     case 'NUTRITION_COACHING':
-      return 'Nutrición';
+      return l10n.specialty_nutritionCoaching;
     case 'CARDIO':
-      return 'Cardio';
+      return l10n.specialty_cardio;
     case 'HIIT':
-      return 'HIIT';
+      return l10n.specialty_hiit;
     default:
       return code;
   }
@@ -75,21 +76,16 @@ class _CoachSearchViewState extends State<CoachSearchView> {
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
+    final l10n = AppLocalizations.of(context)!;
+    return Scaffold(
+      appBar: AppBar(title: Text(l10n.coachSearch_appBarTitle)),
+      body: ListView(
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
       children: [
-        const Text(
-          'Encuentra tu coach',
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.w800,
-            color: AppColors.textPrimary,
-          ),
-        ),
         const SizedBox(height: 4),
-        const Text(
-          'Filtra por especialidad y precio.',
-          style: TextStyle(color: AppColors.textSecondary),
+        Text(
+          l10n.coachSearch_subtitle,
+          style: const TextStyle(color: AppColors.textSecondary),
         ),
         const SizedBox(height: 16),
         Wrap(
@@ -98,7 +94,7 @@ class _CoachSearchViewState extends State<CoachSearchView> {
           children: _kAllSpecialties.map((s) {
             final selected = _specialties.contains(s);
             return FilterChip(
-              label: Text(specialtyLabel(s)),
+              label: Text(specialtyLabel(l10n, s)),
               selected: selected,
               onSelected: (v) {
                 setState(() {
@@ -113,7 +109,7 @@ class _CoachSearchViewState extends State<CoachSearchView> {
           }).toList(),
         ),
         const SizedBox(height: 12),
-        Text('Precio máx por hora: S/ ${_maxRate.toStringAsFixed(0)}'),
+        Text(l10n.coachSearch_maxRateLabel(_maxRate.toStringAsFixed(0))),
         Slider(
           min: 20,
           max: 500,
@@ -125,7 +121,7 @@ class _CoachSearchViewState extends State<CoachSearchView> {
           width: double.infinity,
           child: ElevatedButton.icon(
             icon: const Icon(Icons.search),
-            label: const Text('Buscar coaches'),
+            label: Text(l10n.coachSearch_searchButton),
             onPressed: () => setState(_runSearch),
           ),
         ),
@@ -137,10 +133,10 @@ class _CoachSearchViewState extends State<CoachSearchView> {
             onRetry: () => setState(_runSearch),
             builder: (context, coaches) {
               if (coaches.isEmpty) {
-                return const EmptyStateView(
+                return EmptyStateView(
                   icon: Icons.person_search_outlined,
-                  title: 'No encontramos coaches',
-                  subtitle: 'Prueba ampliando los filtros.',
+                  title: l10n.coachSearch_emptyTitle,
+                  subtitle: l10n.coachSearch_emptySubtitle,
                 );
               }
               return ListView.separated(
@@ -163,6 +159,7 @@ class _CoachSearchViewState extends State<CoachSearchView> {
           ),
         ),
       ],
+      ),
     );
   }
 }
@@ -175,6 +172,7 @@ class _CoachCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Card(
       child: InkWell(
         onTap: onTap,
@@ -194,7 +192,7 @@ class _CoachCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Coach #${coach.userId}',
+                      l10n.coachSearch_coachIdLabel(coach.userId),
                       style: const TextStyle(
                         fontWeight: FontWeight.w700,
                         fontSize: 15,
@@ -202,7 +200,7 @@ class _CoachCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      coach.specialties.take(3).map(specialtyLabel).join(' · '),
+                      coach.specialties.take(3).map((s) => specialtyLabel(l10n, s)).join(' · '),
                       style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -214,7 +212,7 @@ class _CoachCard extends StatelessWidget {
                         Text(coach.averageRating.toStringAsFixed(1)),
                         const SizedBox(width: 8),
                         Text(
-                          '${coach.totalReviews} reseñas',
+                          l10n.coachSearch_reviewsCount(coach.totalReviews),
                           style: const TextStyle(
                             color: AppColors.textMuted,
                             fontSize: 12,
@@ -235,9 +233,9 @@ class _CoachCard extends StatelessWidget {
                       color: AppColors.primary,
                     ),
                   ),
-                  const Text(
-                    '/ hora',
-                    style: TextStyle(color: AppColors.textMuted, fontSize: 11),
+                  Text(
+                    l10n.coachSearch_perHourSuffix,
+                    style: const TextStyle(color: AppColors.textMuted, fontSize: 11),
                   ),
                 ],
               ),

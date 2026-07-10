@@ -9,7 +9,7 @@
 /// a qué bounded context pertenezcan; el refresh-token va siempre a microservicios
 /// porque IAM emite y persiste los refresh tokens.
 class AppConfig {
-  static const Environment currentEnvironment = Environment.androidEmulator;
+  static const Environment currentEnvironment = Environment.physicalDevice;
 
   static const int _microservicesPort = 8080;
   static const int _monolithPort = 8091;
@@ -35,8 +35,9 @@ class AppConfig {
       case Environment.iosSimulator:
         return 'http://localhost:$port/api/v1';
       case Environment.physicalDevice:
-        // ⚠️ Reemplaza por la IP local de la PC en la misma red WiFi
-        return 'http://192.168.1.100:$port/api/v1';
+        // Usamos adb reverse (USB), por eso el celular ve la PC como localhost.
+        // Si en vez de USB usas la misma red WiFi, cambia esto por la IP LAN de la PC.
+        return 'http://127.0.0.1:$port/api/v1';
       case Environment.production:
         return 'https://api.bodymatch.ai/api/v1';
     }

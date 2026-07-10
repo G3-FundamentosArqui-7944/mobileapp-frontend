@@ -5,6 +5,7 @@ import '../../constants/app_colors.dart';
 import '../../data/models/auth_models.dart';
 import '../../data/models/training_models.dart';
 import '../../data/repositories/training_repository.dart';
+import '../../l10n/generated/app_localizations.dart';
 import '../common/async_view.dart';
 import '../common/section_header.dart';
 import '../matchmaking/coach_search_view.dart';
@@ -36,13 +37,14 @@ class _AthleteHomeViewState extends State<AthleteHomeView> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return RefreshIndicator(
       onRefresh: () async => setState(_load),
       child: ListView(
         padding: const EdgeInsets.all(20),
         children: [
           Text(
-            'Hola, ${widget.user.firstName ?? 'atleta'} 👋',
+            l10n.athleteHome_greeting(widget.user.firstName ?? l10n.athleteHome_defaultName),
             style: const TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.w800,
@@ -50,13 +52,13 @@ class _AthleteHomeViewState extends State<AthleteHomeView> {
             ),
           ),
           const SizedBox(height: 4),
-          const Text(
-            'Aquí está tu progreso de entrenamiento.',
-            style: TextStyle(color: AppColors.textSecondary),
+          Text(
+            l10n.athleteHome_subtitle,
+            style: const TextStyle(color: AppColors.textSecondary),
           ),
           const SizedBox(height: 20),
           SizedBox(
-            height: 220,
+            height: 260,
             child: AsyncView<TrainingAnalytics>(
               future: _analyticsFuture,
               onRetry: () => setState(_load),
@@ -64,15 +66,15 @@ class _AthleteHomeViewState extends State<AthleteHomeView> {
             ),
           ),
           const SizedBox(height: 12),
-          const SectionHeader(
-            title: 'Atajos',
-            subtitle: 'Las acciones que más usas',
+          SectionHeader(
+            title: l10n.athleteHome_shortcutsTitle,
+            subtitle: l10n.athleteHome_shortcutsSubtitle,
           ),
           _ShortcutTile(
             icon: Icons.fitness_center_rounded,
             color: AppColors.primary,
-            title: 'Mis entrenamientos',
-            subtitle: 'Inicia una sesión y registra tus ejercicios',
+            title: l10n.workoutList_appBarTitle,
+            subtitle: l10n.athleteHome_workoutsShortcutSubtitle,
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => WorkoutListView(userId: widget.user.id)),
             ),
@@ -80,8 +82,8 @@ class _AthleteHomeViewState extends State<AthleteHomeView> {
           _ShortcutTile(
             icon: Icons.videocam_rounded,
             color: AppColors.accent,
-            title: 'Subir un video',
-            subtitle: 'Recibe feedback técnico de IA',
+            title: l10n.athleteHome_uploadVideoTitle,
+            subtitle: l10n.athleteHome_uploadVideoSubtitle,
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => VideoAnalysisView(userId: widget.user.id)),
             ),
@@ -89,8 +91,8 @@ class _AthleteHomeViewState extends State<AthleteHomeView> {
           _ShortcutTile(
             icon: Icons.restaurant_rounded,
             color: AppColors.warning,
-            title: 'Registrar comida',
-            subtitle: 'Foto del plato → calorías y macros',
+            title: l10n.athleteHome_logMealTitle,
+            subtitle: l10n.athleteHome_logMealSubtitle,
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => NutritionView(userId: widget.user.id)),
             ),
@@ -98,8 +100,8 @@ class _AthleteHomeViewState extends State<AthleteHomeView> {
           _ShortcutTile(
             icon: Icons.search_rounded,
             color: AppColors.coachAccent,
-            title: 'Encontrar coach',
-            subtitle: 'Filtra por especialidad y precio',
+            title: l10n.coachSearch_appBarTitle,
+            subtitle: l10n.athleteHome_findCoachSubtitle,
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => CoachSearchView(athleteId: widget.user.id)),
             ),
@@ -116,27 +118,28 @@ class _AnalyticsGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final cards = <Widget>[
       _MetricCard(
-        label: 'Entrenamientos',
+        label: l10n.athleteHome_workoutsStat,
         value: analytics.totalWorkouts.toString(),
         icon: Icons.fitness_center,
         color: AppColors.primary,
       ),
       _MetricCard(
-        label: 'Completados',
+        label: l10n.athleteHome_completedStat,
         value: analytics.completedWorkouts.toString(),
         icon: Icons.check_circle_outline,
         color: AppColors.success,
       ),
       _MetricCard(
-        label: 'Volumen total',
+        label: l10n.athleteHome_totalVolumeStat,
         value: analytics.totalVolume.toString(),
         icon: Icons.bolt,
         color: AppColors.coachAccent,
       ),
       _MetricCard(
-        label: 'Tasa éxito',
+        label: l10n.athleteHome_successRateStat,
         value: '${(analytics.completionRate * 100).toStringAsFixed(0)}%',
         icon: Icons.trending_up,
         color: AppColors.accent,
@@ -147,7 +150,7 @@ class _AnalyticsGrid extends StatelessWidget {
       crossAxisCount: 2,
       mainAxisSpacing: 12,
       crossAxisSpacing: 12,
-      childAspectRatio: 1.5,
+      childAspectRatio: 1.3,
       children: cards,
     );
   }
@@ -168,7 +171,7 @@ class _MetricCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: AppColors.backgroundCard,
         borderRadius: BorderRadius.circular(16),
@@ -177,6 +180,7 @@ class _MetricCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Container(
             padding: const EdgeInsets.all(8),
@@ -189,7 +193,7 @@ class _MetricCard extends StatelessWidget {
           Text(
             value,
             style: const TextStyle(
-              fontSize: 22,
+              fontSize: 20,
               fontWeight: FontWeight.w800,
               color: AppColors.textPrimary,
             ),

@@ -7,6 +7,8 @@ import '../../data/models/auth_models.dart';
 import '../../data/models/matchmaking_models.dart';
 import '../../data/repositories/connection_requests_repository.dart';
 import '../../data/repositories/training_sessions_repository.dart';
+import '../../l10n/generated/app_localizations.dart';
+import '../../providers/locale_controller.dart';
 import '../common/async_view.dart';
 import '../common/section_header.dart';
 
@@ -47,6 +49,8 @@ class _CoachHomeViewState extends State<CoachHomeView> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final intlLocale = context.watch<LocaleController>().intlLocaleCode;
     return RefreshIndicator(
       onRefresh: () async => setState(_load),
       child: AsyncView<_CoachOverview>(
@@ -58,7 +62,7 @@ class _CoachHomeViewState extends State<CoachHomeView> {
             padding: const EdgeInsets.all(20),
             children: [
               Text(
-                'Hola, ${widget.coach.firstName ?? 'coach'} 👋',
+                l10n.coachHome_greeting(widget.coach.firstName ?? l10n.coachHome_defaultName),
                 style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.w800,
@@ -66,9 +70,9 @@ class _CoachHomeViewState extends State<CoachHomeView> {
                 ),
               ),
               const SizedBox(height: 4),
-              const Text(
-                'Tu día como coach.',
-                style: TextStyle(color: AppColors.textSecondary),
+              Text(
+                l10n.coachHome_subtitle,
+                style: const TextStyle(color: AppColors.textSecondary),
               ),
               const SizedBox(height: 20),
               Row(
@@ -76,7 +80,7 @@ class _CoachHomeViewState extends State<CoachHomeView> {
                   Expanded(
                     child: _StatCard(
                       icon: Icons.group,
-                      label: 'Clientes activos',
+                      label: l10n.coachHome_activeClients,
                       value: data.clients.length.toString(),
                       color: AppColors.coachAccent,
                     ),
@@ -85,7 +89,7 @@ class _CoachHomeViewState extends State<CoachHomeView> {
                   Expanded(
                     child: _StatCard(
                       icon: Icons.pending_actions,
-                      label: 'Solicitudes',
+                      label: l10n.coachHome_requests,
                       value: data.pending.length.toString(),
                       color: AppColors.warning,
                     ),
@@ -95,19 +99,19 @@ class _CoachHomeViewState extends State<CoachHomeView> {
               const SizedBox(height: 12),
               _StatCard(
                 icon: Icons.calendar_today,
-                label: 'Próximas sesiones',
+                label: l10n.coachHome_upcomingSessions,
                 value: data.sessions.length.toString(),
                 color: AppColors.primary,
               ),
               const SizedBox(height: 24),
-              const SectionHeader(title: 'Próxima sesión'),
+              SectionHeader(title: l10n.coachHome_nextSessionSection),
               if (next == null)
-                const Card(
+                Card(
                   child: Padding(
-                    padding: EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(16),
                     child: Text(
-                      'No tienes sesiones programadas.',
-                      style: TextStyle(color: AppColors.textSecondary),
+                      l10n.coachHome_noSessionsScheduled,
+                      style: const TextStyle(color: AppColors.textSecondary),
                     ),
                   ),
                 )
@@ -119,12 +123,12 @@ class _CoachHomeViewState extends State<CoachHomeView> {
                       child: Icon(Icons.fitness_center, color: Colors.white),
                     ),
                     title: Text(
-                      DateFormat("EEEE d 'de' MMMM, HH:mm", 'es_PE').format(next.scheduledAt),
+                      DateFormat("EEEE d 'de' MMMM, HH:mm", intlLocale).format(next.scheduledAt),
                       style: const TextStyle(fontWeight: FontWeight.w700),
                     ),
                     subtitle: Text(
-                      'Atleta #${next.athleteId} · ${next.durationMinutes} min'
-                      '${next.location != null ? ' · ${next.location}' : ''}',
+                      l10n.coachHome_athleteSessionInfo(next.athleteId, next.durationMinutes) +
+                          (next.location != null ? ' · ${next.location}' : ''),
                     ),
                   ),
                 ),

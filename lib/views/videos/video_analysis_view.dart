@@ -8,6 +8,7 @@ import '../../constants/app_colors.dart';
 import '../../data/api/api_client.dart';
 import '../../data/models/videos_models.dart';
 import '../../data/repositories/videos_repository.dart';
+import '../../l10n/generated/app_localizations.dart';
 import '../common/async_view.dart';
 import 'video_detail_view.dart';
 
@@ -35,6 +36,7 @@ class _VideoAnalysisViewState extends State<VideoAnalysisView> {
   }
 
   Future<void> _pickAndUpload(ImageSource source) async {
+    final l10n = AppLocalizations.of(context)!;
     final picker = ImagePicker();
     final picked = await picker.pickVideo(
       source: source,
@@ -47,27 +49,30 @@ class _VideoAnalysisViewState extends State<VideoAnalysisView> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Datos del video'),
+        title: Text(l10n.videoAnalysis_videoDetailsTitle),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
               controller: exerciseCtrl,
-              decoration: const InputDecoration(
-                labelText: 'Ejercicio (ej. Sentadilla)',
+              decoration: InputDecoration(
+                labelText: l10n.videoAnalysis_exerciseLabel,
               ),
             ),
             const SizedBox(height: 8),
             TextField(
               controller: descriptionCtrl,
-              decoration: const InputDecoration(labelText: 'Notas (opcional)'),
+              decoration: InputDecoration(labelText: l10n.videoAnalysis_notesLabel),
               maxLines: 2,
             ),
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
-          ElevatedButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Subir')),
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(l10n.common_cancel)),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(l10n.videoAnalysis_uploadButton),
+          ),
         ],
       ),
     );
@@ -77,13 +82,15 @@ class _VideoAnalysisViewState extends State<VideoAnalysisView> {
     try {
       final video = await context.read<VideosRepository>().upload(
             userId: widget.userId,
-            exerciseName: exerciseCtrl.text.trim().isEmpty ? 'Ejercicio' : exerciseCtrl.text.trim(),
+            exerciseName: exerciseCtrl.text.trim().isEmpty
+                ? l10n.videoAnalysis_defaultExerciseName
+                : exerciseCtrl.text.trim(),
             description: descriptionCtrl.text.trim().isEmpty ? null : descriptionCtrl.text.trim(),
             file: File(picked.path),
           );
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Video subido. Procesando análisis…')),
+        SnackBar(content: Text(l10n.videoAnalysis_uploadedProcessing)),
       );
       // El detail view se encarga de disparar /analyze cuando vea el video en UPLOADED.
       Navigator.of(context).push(
@@ -104,6 +111,7 @@ class _VideoAnalysisViewState extends State<VideoAnalysisView> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: Colors.transparent,
       floatingActionButton: FloatingActionButton.extended(
@@ -114,7 +122,7 @@ class _VideoAnalysisViewState extends State<VideoAnalysisView> {
                 child: CircularProgressIndicator(strokeWidth: 2.4, color: Colors.white),
               )
             : const Icon(Icons.add),
-        label: Text(_uploading ? 'Subiendo…' : 'Nuevo video'),
+        label: Text(_uploading ? l10n.videoAnalysis_uploadingButton : l10n.videoAnalysis_newVideoButton),
       ),
       body: RefreshIndicator(
         onRefresh: () async => setState(_load),
@@ -123,10 +131,10 @@ class _VideoAnalysisViewState extends State<VideoAnalysisView> {
           onRetry: () => setState(_load),
           builder: (context, videos) {
             if (videos.isEmpty) {
-              return const EmptyStateView(
+              return EmptyStateView(
                 icon: Icons.videocam_outlined,
-                title: 'Sin videos aún',
-                subtitle: 'Sube tu primer video para recibir feedback técnico.',
+                title: l10n.videoAnalysis_emptyTitle,
+                subtitle: l10n.videoAnalysis_emptySubtitle,
               );
             }
             return ListView.separated(
@@ -147,6 +155,7 @@ class _VideoAnalysisViewState extends State<VideoAnalysisView> {
   }
 
   void _showUploadSheet() {
+    final l10n = AppLocalizations.of(context)!;
     showModalBottomSheet(
       context: context,
       builder: (ctx) => SafeArea(
@@ -155,7 +164,7 @@ class _VideoAnalysisViewState extends State<VideoAnalysisView> {
           children: [
             ListTile(
               leading: const Icon(Icons.videocam),
-              title: const Text('Grabar con cámara'),
+              title: Text(l10n.videoAnalysis_recordWithCamera),
               onTap: () {
                 Navigator.pop(ctx);
                 _pickAndUpload(ImageSource.camera);
@@ -163,7 +172,7 @@ class _VideoAnalysisViewState extends State<VideoAnalysisView> {
             ),
             ListTile(
               leading: const Icon(Icons.video_library),
-              title: const Text('Elegir de la galería'),
+              title: Text(l10n.nutrition_chooseFromGallery),
               onTap: () {
                 Navigator.pop(ctx);
                 _pickAndUpload(ImageSource.gallery);

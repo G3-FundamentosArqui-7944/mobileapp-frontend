@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../bloc/auth/auth_bloc.dart';
 import '../../constants/app_colors.dart';
+import '../../l10n/generated/app_localizations.dart';
 import '../onboarding/profile_onboarding_view.dart';
 
 class SignUpView extends StatefulWidget {
@@ -51,7 +52,8 @@ class _SignUpViewState extends State<SignUpView> {
 
   @override
   Widget build(BuildContext context) {
-    final roleLabel = widget.asCoach ? 'coach' : 'atleta';
+    final l10n = AppLocalizations.of(context)!;
+    final roleLabel = widget.asCoach ? l10n.signUp_roleCoach : l10n.signUp_roleAthlete;
     return BlocConsumer<AuthBloc, AuthState>(
       listener: (context, state) {
         if (state is AuthAuthenticated) {
@@ -71,7 +73,7 @@ class _SignUpViewState extends State<SignUpView> {
       builder: (context, state) {
         final loading = state is AuthLoading;
         return Scaffold(
-          appBar: AppBar(title: Text('Registro de $roleLabel')),
+          appBar: AppBar(title: Text(l10n.signUp_appBarTitle(roleLabel))),
           body: SafeArea(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
@@ -81,7 +83,7 @@ class _SignUpViewState extends State<SignUpView> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Text(
-                      'Crea tu cuenta de $roleLabel',
+                      l10n.signUp_heading(roleLabel),
                       style: const TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.w800,
@@ -94,18 +96,20 @@ class _SignUpViewState extends State<SignUpView> {
                         Expanded(
                           child: TextFormField(
                             controller: _firstNameCtrl,
-                            decoration: const InputDecoration(labelText: 'Nombre'),
-                            validator: (v) =>
-                                (v == null || v.trim().isEmpty) ? 'Requerido' : null,
+                            decoration: InputDecoration(labelText: l10n.signUp_firstNameLabel),
+                            validator: (v) => (v == null || v.trim().isEmpty)
+                                ? l10n.common_requiredField
+                                : null,
                           ),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: TextFormField(
                             controller: _lastNameCtrl,
-                            decoration: const InputDecoration(labelText: 'Apellido'),
-                            validator: (v) =>
-                                (v == null || v.trim().isEmpty) ? 'Requerido' : null,
+                            decoration: InputDecoration(labelText: l10n.signUp_lastNameLabel),
+                            validator: (v) => (v == null || v.trim().isEmpty)
+                                ? l10n.common_requiredField
+                                : null,
                           ),
                         ),
                       ],
@@ -115,14 +119,14 @@ class _SignUpViewState extends State<SignUpView> {
                       controller: _emailCtrl,
                       keyboardType: TextInputType.emailAddress,
                       autocorrect: false,
-                      decoration: const InputDecoration(
-                        labelText: 'Correo electrónico',
-                        prefixIcon: Icon(Icons.alternate_email),
+                      decoration: InputDecoration(
+                        labelText: l10n.common_emailLabel,
+                        prefixIcon: const Icon(Icons.alternate_email),
                       ),
                       validator: (v) {
                         final value = v?.trim() ?? '';
-                        if (value.isEmpty) return 'Ingresa tu correo';
-                        if (!value.contains('@')) return 'Correo inválido';
+                        if (value.isEmpty) return l10n.common_emailRequired;
+                        if (!value.contains('@')) return l10n.common_emailInvalid;
                         return null;
                       },
                     ),
@@ -130,9 +134,9 @@ class _SignUpViewState extends State<SignUpView> {
                     TextFormField(
                       controller: _phoneCtrl,
                       keyboardType: TextInputType.phone,
-                      decoration: const InputDecoration(
-                        labelText: 'Teléfono (opcional)',
-                        prefixIcon: Icon(Icons.phone_outlined),
+                      decoration: InputDecoration(
+                        labelText: l10n.signUp_phoneLabel,
+                        prefixIcon: const Icon(Icons.phone_outlined),
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -140,7 +144,7 @@ class _SignUpViewState extends State<SignUpView> {
                       controller: _passwordCtrl,
                       obscureText: _obscure,
                       decoration: InputDecoration(
-                        labelText: 'Contraseña',
+                        labelText: l10n.common_passwordLabel,
                         prefixIcon: const Icon(Icons.lock_outline),
                         suffixIcon: IconButton(
                           icon: Icon(_obscure ? Icons.visibility_off : Icons.visibility),
@@ -148,10 +152,12 @@ class _SignUpViewState extends State<SignUpView> {
                         ),
                       ),
                       validator: (v) {
-                        if (v == null || v.isEmpty) return 'Ingresa una contraseña';
-                        if (v.length < 8) return 'Mínimo 8 caracteres';
-                        if (!RegExp(r'[A-Z]').hasMatch(v)) return 'Debe incluir una mayúscula';
-                        if (!RegExp(r'[0-9]').hasMatch(v)) return 'Debe incluir un número';
+                        if (v == null || v.isEmpty) return l10n.signUp_passwordRequired;
+                        if (v.length < 8) return l10n.signUp_passwordMinLength;
+                        if (!RegExp(r'[A-Z]').hasMatch(v)) {
+                          return l10n.signUp_passwordNeedsUppercase;
+                        }
+                        if (!RegExp(r'[0-9]').hasMatch(v)) return l10n.signUp_passwordNeedsNumber;
                         return null;
                       },
                     ),
@@ -159,12 +165,12 @@ class _SignUpViewState extends State<SignUpView> {
                     TextFormField(
                       controller: _confirmCtrl,
                       obscureText: _obscure,
-                      decoration: const InputDecoration(
-                        labelText: 'Confirmar contraseña',
-                        prefixIcon: Icon(Icons.lock_outline),
+                      decoration: InputDecoration(
+                        labelText: l10n.signUp_confirmPasswordLabel,
+                        prefixIcon: const Icon(Icons.lock_outline),
                       ),
                       validator: (v) {
-                        if (v != _passwordCtrl.text) return 'Las contraseñas no coinciden';
+                        if (v != _passwordCtrl.text) return l10n.signUp_passwordMismatch;
                         return null;
                       },
                     ),
@@ -180,7 +186,7 @@ class _SignUpViewState extends State<SignUpView> {
                                 strokeWidth: 2.4,
                               ),
                             )
-                          : const Text('Crear cuenta'),
+                          : Text(l10n.signUp_submitButton),
                     ),
                   ],
                 ),

@@ -13,17 +13,18 @@ import '../data/repositories/training_repository.dart';
 import '../data/repositories/training_sessions_repository.dart';
 import '../data/repositories/videos_repository.dart';
 import '../data/storage/token_manager.dart';
+import 'locale_controller.dart';
 
 /// Marcadores de tipo para distinguir los dos clientes HTTP en el árbol de
 /// providers. Provider los indexa por tipo, así que un alias por subclase es
 /// la forma más simple de inyectar dos `ApiClient` distintos.
 class MicroservicesApiClient extends ApiClient {
-  MicroservicesApiClient({required super.tokenManager})
+  MicroservicesApiClient({required super.tokenManager, required super.localeController})
       : super(baseUrl: AppConfig.microservicesBaseUrl);
 }
 
 class MonolithApiClient extends ApiClient {
-  MonolithApiClient({required super.tokenManager})
+  MonolithApiClient({required super.tokenManager, required super.localeController})
       : super(
           baseUrl: AppConfig.monolithBaseUrl,
           refreshBaseUrl: AppConfig.refreshBaseUrl,
@@ -51,14 +52,14 @@ class DependencyProvider extends StatelessWidget {
         Provider<TokenManager>(create: (_) => TokenManager()),
 
         // Clientes HTTP — uno por backend.
-        ProxyProvider<TokenManager, MicroservicesApiClient>(
-          update: (_, tokens, previous) =>
-              previous ?? MicroservicesApiClient(tokenManager: tokens),
+        ProxyProvider2<TokenManager, LocaleController, MicroservicesApiClient>(
+          update: (_, tokens, locale, previous) =>
+              previous ?? MicroservicesApiClient(tokenManager: tokens, localeController: locale),
           dispose: (_, client) => client.dispose(),
         ),
-        ProxyProvider<TokenManager, MonolithApiClient>(
-          update: (_, tokens, previous) =>
-              previous ?? MonolithApiClient(tokenManager: tokens),
+        ProxyProvider2<TokenManager, LocaleController, MonolithApiClient>(
+          update: (_, tokens, locale, previous) =>
+              previous ?? MonolithApiClient(tokenManager: tokens, localeController: locale),
           dispose: (_, client) => client.dispose(),
         ),
 

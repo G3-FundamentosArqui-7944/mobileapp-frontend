@@ -40,6 +40,7 @@ migrate_working_dir/
 /build/
 /coverage/
 **/build/
+lib/l10n/generated/
 
 # Symbolication related
 app.*.symbols

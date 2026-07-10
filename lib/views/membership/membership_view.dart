@@ -6,6 +6,8 @@ import '../../constants/app_colors.dart';
 import '../../data/api/api_client.dart';
 import '../../data/models/membership_models.dart';
 import '../../data/repositories/membership_repository.dart';
+import '../../l10n/generated/app_localizations.dart';
+import '../../providers/locale_controller.dart';
 import '../common/async_view.dart';
 import '../common/section_header.dart';
 
@@ -37,17 +39,24 @@ class _MembershipViewState extends State<MembershipView> {
   }
 
   Future<void> _subscribe(MembershipPlan plan) async {
+    final l10n = AppLocalizations.of(context)!;
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text('Suscribirse a ${plan.name}'),
+        title: Text(l10n.membership_subscribeDialogTitle(plan.name)),
         content: Text(
-          'Se creará una suscripción ${plan.billingPeriod.toLowerCase()} por '
-          '${plan.currency} ${plan.priceAmount.toStringAsFixed(2)}.',
+          l10n.membership_subscribeDialogMessage(
+            plan.billingPeriod.toLowerCase(),
+            plan.currency,
+            plan.priceAmount.toStringAsFixed(2),
+          ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
-          ElevatedButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Suscribirme')),
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(l10n.common_cancel)),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(l10n.membership_subscribeButton),
+          ),
         ],
       ),
     );
@@ -58,7 +67,7 @@ class _MembershipViewState extends State<MembershipView> {
           );
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Suscripción creada')),
+        SnackBar(content: Text(l10n.membership_subscriptionCreated)),
       );
       setState(_load);
     } on ApiException catch (e) {
@@ -71,8 +80,9 @@ class _MembershipViewState extends State<MembershipView> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: const Text('Membresía')),
+      appBar: AppBar(title: Text(l10n.membership_appBarTitle)),
       body: RefreshIndicator(
         onRefresh: () async => setState(_load),
         child: AsyncView<_MembershipData>(
@@ -84,13 +94,13 @@ class _MembershipViewState extends State<MembershipView> {
               children: [
                 _StatusBanner(status: data.status),
                 const SizedBox(height: 24),
-                const SectionHeader(title: 'Planes disponibles'),
+                SectionHeader(title: l10n.membership_availablePlansSection),
                 if (data.plans.isEmpty)
-                  const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 16),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
                     child: Text(
-                      'No hay planes activos por el momento.',
-                      style: TextStyle(color: AppColors.textSecondary),
+                      l10n.membership_noActivePlans,
+                      style: const TextStyle(color: AppColors.textSecondary),
                     ),
                   )
                 else
@@ -116,6 +126,8 @@ class _StatusBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final intlLocale = context.watch<LocaleController>().intlLocaleCode;
     final active = status.active;
     final color = active ? AppColors.success : AppColors.textMuted;
     return Container(
@@ -134,7 +146,7 @@ class _StatusBanner extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  active ? 'Membresía activa' : 'Sin membresía activa',
+                  active ? l10n.membership_activeStatus : l10n.membership_inactiveStatus,
                   style: TextStyle(
                     color: color,
                     fontWeight: FontWeight.w800,
@@ -143,8 +155,12 @@ class _StatusBanner extends StatelessWidget {
                 ),
                 if (active && status.planCode != null)
                   Text(
-                    'Plan ${status.planCode} · vigente hasta '
-                    '${status.currentPeriodEnd == null ? '—' : DateFormat('d MMM y', 'es_PE').format(status.currentPeriodEnd!)}',
+                    l10n.membership_planValidUntil(
+                      status.planCode!,
+                      status.currentPeriodEnd == null
+                          ? '—'
+                          : DateFormat('d MMM y', intlLocale).format(status.currentPeriodEnd!),
+                    ),
                     style: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
                   ),
               ],
@@ -200,7 +216,7 @@ class _PlanCard extends StatelessWidget {
             const SizedBox(height: 12),
             ElevatedButton(
               onPressed: onSubscribe,
-              child: const Text('Suscribirme a este plan'),
+              child: Text(AppLocalizations.of(context)!.membership_subscribeToPlanButton),
             ),
           ],
         ),

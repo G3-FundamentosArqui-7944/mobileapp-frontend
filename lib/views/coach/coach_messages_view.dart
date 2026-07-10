@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/generated/app_localizations.dart';
 import '../common/async_view.dart';
 
 /// Mensajería 1-a-1: el backend actual no expone este módulo, así que mostramos
@@ -9,11 +10,11 @@ class CoachMessagesView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const EmptyStateView(
+    final l10n = AppLocalizations.of(context)!;
+    return EmptyStateView(
       icon: Icons.chat_bubble_outline,
-      title: 'Mensajería próximamente',
-      subtitle:
-          'El módulo de chat aún no está habilitado en el backend. Estará disponible muy pronto.',
+      title: l10n.coachMessages_title,
+      subtitle: l10n.coachMessages_subtitle,
     );
   }
 }

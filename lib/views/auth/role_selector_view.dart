@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../constants/app_colors.dart';
+import '../../l10n/generated/app_localizations.dart';
 import 'sign_up_view.dart';
 
 /// Selector de rol antes del registro: Atleta o Coach.
@@ -10,32 +11,32 @@ class RoleSelectorView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: const Text('Elige cómo te unes')),
+      appBar: AppBar(title: Text(l10n.roleSelector_appBarTitle)),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Text(
-                '¿Quién eres en BodyMatch?',
-                style: TextStyle(
+              Text(
+                l10n.roleSelector_heading,
+                style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.w800,
                   color: AppColors.textPrimary,
                 ),
               ),
               const SizedBox(height: 8),
-              const Text(
-                'Tu rol define cómo será tu experiencia. Lo puedes cambiar más adelante.',
-                style: TextStyle(color: AppColors.textSecondary, fontSize: 15),
+              Text(
+                l10n.roleSelector_subtitle,
+                style: const TextStyle(color: AppColors.textSecondary, fontSize: 15),
               ),
               const SizedBox(height: 24),
               _RoleCard(
-                title: 'Soy atleta',
-                description:
-                    'Quiero entrenar, recibir feedback con IA, encontrar coaches y registrar mi nutrición.',
+                title: l10n.roleSelector_athleteTitle,
+                description: l10n.roleSelector_athleteDescription,
                 icon: Icons.directions_run,
                 accent: AppColors.athleteAccent,
                 onTap: () => Navigator.of(context).push(
@@ -44,9 +45,8 @@ class RoleSelectorView extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               _RoleCard(
-                title: 'Soy coach',
-                description:
-                    'Quiero ofrecer mis servicios, gestionar clientes y agendar sesiones de entrenamiento.',
+                title: l10n.roleSelector_coachTitle,
+                description: l10n.roleSelector_coachDescription,
                 icon: Icons.sports,
                 accent: AppColors.coachAccent,
                 onTap: () => Navigator.of(context).push(

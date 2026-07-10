@@ -7,6 +7,7 @@ import '../../constants/app_colors.dart';
 import '../../data/api/api_client.dart';
 import '../../data/models/videos_models.dart';
 import '../../data/repositories/videos_repository.dart';
+import '../../l10n/generated/app_localizations.dart';
 
 /// Detalle del video: hace polling cada 5s hasta que el backend marca COMPLETED/FAILED.
 class VideoDetailView extends StatefulWidget {
@@ -67,16 +68,20 @@ class _VideoDetailViewState extends State<VideoDetailView> {
     } on ApiException catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Análisis: ${e.message}'), backgroundColor: AppColors.error),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.videoDetail_analysisFailedPrefix(e.message)),
+          backgroundColor: AppColors.error,
+        ),
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final v = _video;
     return Scaffold(
-      appBar: AppBar(title: Text(v?.exerciseName ?? 'Análisis de video')),
+      appBar: AppBar(title: Text(v?.exerciseName ?? l10n.videoDetail_appBarDefaultTitle)),
       body: v == null
           ? Center(
               child: _error == null
@@ -110,7 +115,8 @@ class _VideoDetailViewState extends State<VideoDetailView> {
                           ],
                           const SizedBox(height: 8),
                           Text(
-                            'Tamaño: ${(v.sizeBytes / 1024 / 1024).toStringAsFixed(1)} MB',
+                            l10n.videoDetail_sizeLabel(
+                                (v.sizeBytes / 1024 / 1024).toStringAsFixed(1)),
                             style: const TextStyle(color: AppColors.textMuted, fontSize: 12),
                           ),
                         ],
@@ -147,6 +153,7 @@ class _StatusBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final color = video.isCompleted
         ? AppColors.success
         : video.isFailed
@@ -173,10 +180,10 @@ class _StatusBanner extends StatelessWidget {
           Expanded(
             child: Text(
               video.isCompleted
-                  ? 'Análisis completado'
+                  ? l10n.videoDetail_analysisCompleted
                   : video.isFailed
-                      ? 'No se pudo analizar el video'
-                      : 'Procesando análisis con IA…',
+                      ? l10n.videoDetail_analysisFailedStatus
+                      : l10n.videoDetail_processingStatus,
               style: TextStyle(color: color, fontWeight: FontWeight.w700),
             ),
           ),
@@ -192,13 +199,14 @@ class _AnalysisSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
-            const Text('Resultado IA',
-                style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
+            Text(l10n.videoDetail_aiResultTitle,
+                style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
             const Spacer(),
             if (analysis.overallScore != null)
               Container(
@@ -208,7 +216,8 @@ class _AnalysisSection extends StatelessWidget {
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
-                  '${analysis.overallScore!.toStringAsFixed(1)} / 10',
+                  // El backend devuelve overallScore en escala 0-100; se muestra como nota sobre 10.
+                  '${(analysis.overallScore! / 10).toStringAsFixed(1)} / 10',
                   style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w700,

@@ -5,6 +5,7 @@ import '../../constants/app_colors.dart';
 import '../../data/api/api_client.dart';
 import '../../data/models/training_models.dart';
 import '../../data/repositories/training_repository.dart';
+import '../../l10n/generated/app_localizations.dart';
 import '../common/async_view.dart';
 import 'workout_session_view.dart';
 
@@ -58,24 +59,25 @@ class _WorkoutListViewState extends State<WorkoutListView> {
   }
 
   Future<String?> _promptTitle() {
+    final l10n = AppLocalizations.of(context)!;
     final ctrl = TextEditingController();
     return showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Nuevo entrenamiento'),
+        title: Text(l10n.workoutList_newDialogTitle),
         content: TextField(
           controller: ctrl,
           autofocus: true,
-          decoration: const InputDecoration(
-            labelText: 'Título',
-            hintText: 'Ej. Pecho y tríceps',
+          decoration: InputDecoration(
+            labelText: l10n.workoutList_titleLabel,
+            hintText: l10n.workoutList_titleHint,
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancelar')),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.common_cancel)),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, ctrl.text),
-            child: const Text('Iniciar'),
+            child: Text(l10n.workoutList_startButton),
           ),
         ],
       ),
@@ -84,8 +86,9 @@ class _WorkoutListViewState extends State<WorkoutListView> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: const Text('Mis entrenamientos')),
+      appBar: AppBar(title: Text(l10n.workoutList_appBarTitle)),
       body: RefreshIndicator(
         onRefresh: () async => setState(_load),
         child: AsyncView<List<WorkoutSession>>(
@@ -94,12 +97,12 @@ class _WorkoutListViewState extends State<WorkoutListView> {
           builder: (context, sessions) {
             if (sessions.isEmpty) {
               return ListView(
-                children: const [
-                  SizedBox(height: 80),
+                children: [
+                  const SizedBox(height: 80),
                   EmptyStateView(
                     icon: Icons.fitness_center,
-                    title: 'Aún no registras entrenamientos',
-                    subtitle: 'Toca el botón + para iniciar tu primera sesión.',
+                    title: l10n.workoutList_emptyTitle,
+                    subtitle: l10n.workoutList_emptySubtitle,
                   ),
                 ],
               );
@@ -129,7 +132,7 @@ class _WorkoutListViewState extends State<WorkoutListView> {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _startNew,
         icon: const Icon(Icons.add),
-        label: const Text('Iniciar'),
+        label: Text(l10n.workoutList_startButton),
       ),
     );
   }
@@ -142,6 +145,7 @@ class _WorkoutCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Card(
       child: InkWell(
         onTap: onTap,
@@ -165,7 +169,8 @@ class _WorkoutCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      '${_fmtDate(session.startedAt)} · ${session.exercises.length} ejercicios',
+                      '${_fmtDate(session.startedAt)} · '
+                      '${l10n.workoutList_exercisesCount(session.exercises.length)}',
                       style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
                     ),
                   ],
@@ -181,9 +186,9 @@ class _WorkoutCard extends StatelessWidget {
                       color: AppColors.primary,
                     ),
                   ),
-                  const Text(
-                    'volumen',
-                    style: TextStyle(color: AppColors.textMuted, fontSize: 11),
+                  Text(
+                    l10n.workoutList_volumeLabel,
+                    style: const TextStyle(color: AppColors.textMuted, fontSize: 11),
                   ),
                 ],
               ),

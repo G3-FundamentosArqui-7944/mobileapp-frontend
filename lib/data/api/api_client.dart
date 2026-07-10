@@ -6,6 +6,8 @@ import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 
 import '../../config/app_config.dart';
+import '../../l10n/generated/app_localizations.dart';
+import '../../providers/locale_controller.dart';
 import '../storage/token_manager.dart';
 import 'api_exceptions.dart';
 
@@ -20,6 +22,7 @@ export 'api_exceptions.dart';
 /// - Es el único punto que conoce el [TokenManager], los repositorios solo usan ApiClient.
 class ApiClient {
   final TokenManager _tokenManager;
+  final LocaleController _localeController;
   final String _baseUrl;
   final String _refreshBaseUrl;
   final http.Client _http;
@@ -30,6 +33,8 @@ class ApiClient {
   /// Mutex para evitar refrescos concurrentes desde múltiples requests.
   Future<bool>? _refreshInFlight;
 
+  AppLocalizations get _l10n => lookupAppLocalizations(_localeController.locale);
+
   /// [baseUrl] resuelve todas las peticiones del cliente. [refreshBaseUrl] es a
   /// dónde se renueva el access token cuando un 401 lo invalida; si se omite,
   /// usa el mismo [baseUrl]. En la arquitectura híbrida apuntamos siempre el
@@ -37,10 +42,12 @@ class ApiClient {
   /// de tokens.
   ApiClient({
     required TokenManager tokenManager,
+    required LocaleController localeController,
     String? baseUrl,
     String? refreshBaseUrl,
     http.Client? httpClient,
   })  : _tokenManager = tokenManager,
+        _localeController = localeController,
         _baseUrl = baseUrl ?? AppConfig.microservicesBaseUrl,
         _refreshBaseUrl = refreshBaseUrl ?? baseUrl ?? AppConfig.refreshBaseUrl,
         _http = httpClient ?? http.Client();
@@ -187,14 +194,14 @@ class ApiClient {
         if (refreshed) {
           response = await doRequest();
         } else {
-          throw SessionExpiredException();
+          throw SessionExpiredException(_l10n.apiError_sessionExpired);
         }
       }
       return _parse(response);
     } on SocketException catch (e) {
-      throw NetworkException('Sin conexión: ${e.message}');
+      throw NetworkException('${_l10n.apiError_noConnection}: ${e.message}');
     } on TimeoutException {
-      throw NetworkException('La petición tardó demasiado');
+      throw NetworkException(_l10n.apiError_timeout);
     }
   }
 
@@ -280,21 +287,21 @@ class ApiClient {
   String _statusMessage(int code) {
     switch (code) {
       case 400:
-        return 'Solicitud inválida';
+        return _l10n.apiError_badRequest;
       case 401:
-        return 'No autorizado';
+        return _l10n.apiError_unauthorized;
       case 403:
-        return 'Acceso denegado';
+        return _l10n.apiError_forbidden;
       case 404:
-        return 'Recurso no encontrado';
+        return _l10n.apiError_notFound;
       case 409:
-        return 'Conflicto con el estado actual';
+        return _l10n.apiError_conflict;
       case 500:
-        return 'Error interno del servidor';
+        return _l10n.apiError_serverError;
       case 503:
-        return 'Servicio no disponible';
+        return _l10n.apiError_serviceUnavailable;
       default:
-        return 'Error HTTP $code';
+        return _l10n.apiError_httpGeneric(code);
     }
   }
 

@@ -13,7 +13,7 @@ class ApiException implements Exception {
 /// Lanzada cuando el refresh-token también es rechazado por el backend.
 /// El AuthBloc debe escucharla para forzar logout.
 class SessionExpiredException extends ApiException {
-  SessionExpiredException([super.message = 'Sesión expirada'])
+  SessionExpiredException([super.message = 'Session expired'])
       : super(statusCode: 401);
 }
 

@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../bloc/auth/auth_bloc.dart';
 import '../../constants/app_colors.dart';
+import '../../l10n/generated/app_localizations.dart';
 import '../home/home_view.dart';
 import 'role_selector_view.dart';
 
@@ -38,6 +39,7 @@ class _SignInViewState extends State<SignInView> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return BlocConsumer<AuthBloc, AuthState>(
       listener: (context, state) {
         if (state is AuthAuthenticated) {
@@ -73,32 +75,32 @@ class _SignInViewState extends State<SignInView> {
                           size: 56, color: AppColors.primary),
                     ),
                     const SizedBox(height: 24),
-                    const Text(
-                      'Bienvenido de vuelta',
-                      style: TextStyle(
+                    Text(
+                      l10n.signIn_welcomeBack,
+                      style: const TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.w800,
                         color: AppColors.textPrimary,
                       ),
                     ),
                     const SizedBox(height: 8),
-                    const Text(
-                      'Ingresa con tu cuenta para seguir entrenando.',
-                      style: TextStyle(color: AppColors.textSecondary, fontSize: 15),
+                    Text(
+                      l10n.signIn_subtitle,
+                      style: const TextStyle(color: AppColors.textSecondary, fontSize: 15),
                     ),
                     const SizedBox(height: 28),
                     TextFormField(
                       controller: _emailCtrl,
                       keyboardType: TextInputType.emailAddress,
                       autocorrect: false,
-                      decoration: const InputDecoration(
-                        labelText: 'Correo electrónico',
-                        prefixIcon: Icon(Icons.alternate_email),
+                      decoration: InputDecoration(
+                        labelText: l10n.common_emailLabel,
+                        prefixIcon: const Icon(Icons.alternate_email),
                       ),
                       validator: (v) {
                         final value = v?.trim() ?? '';
-                        if (value.isEmpty) return 'Ingresa tu correo';
-                        if (!value.contains('@')) return 'Correo inválido';
+                        if (value.isEmpty) return l10n.common_emailRequired;
+                        if (!value.contains('@')) return l10n.common_emailInvalid;
                         return null;
                       },
                     ),
@@ -107,7 +109,7 @@ class _SignInViewState extends State<SignInView> {
                       controller: _passwordCtrl,
                       obscureText: _obscure,
                       decoration: InputDecoration(
-                        labelText: 'Contraseña',
+                        labelText: l10n.common_passwordLabel,
                         prefixIcon: const Icon(Icons.lock_outline),
                         suffixIcon: IconButton(
                           icon: Icon(_obscure ? Icons.visibility_off : Icons.visibility),
@@ -115,8 +117,8 @@ class _SignInViewState extends State<SignInView> {
                         ),
                       ),
                       validator: (v) {
-                        if (v == null || v.isEmpty) return 'Ingresa tu contraseña';
-                        if (v.length < 6) return 'Mínimo 6 caracteres';
+                        if (v == null || v.isEmpty) return l10n.signIn_passwordRequired;
+                        if (v.length < 6) return l10n.signIn_passwordMinLength;
                         return null;
                       },
                     ),
@@ -132,15 +134,15 @@ class _SignInViewState extends State<SignInView> {
                                 strokeWidth: 2.4,
                               ),
                             )
-                          : const Text('Iniciar sesión'),
+                          : Text(l10n.signIn_submitButton),
                     ),
                     const SizedBox(height: 16),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Text(
-                          '¿Aún no tienes cuenta? ',
-                          style: TextStyle(color: AppColors.textSecondary),
+                        Text(
+                          l10n.signIn_noAccountPrompt,
+                          style: const TextStyle(color: AppColors.textSecondary),
                         ),
                         TextButton(
                           onPressed: loading
@@ -150,7 +152,7 @@ class _SignInViewState extends State<SignInView> {
                                       builder: (_) => const RoleSelectorView(),
                                     ),
                                   ),
-                          child: const Text('Regístrate'),
+                          child: Text(l10n.signIn_signUpLink),
                         ),
                       ],
                     ),

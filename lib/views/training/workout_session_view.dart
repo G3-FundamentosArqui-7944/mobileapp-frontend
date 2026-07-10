@@ -5,6 +5,7 @@ import '../../constants/app_colors.dart';
 import '../../data/api/api_client.dart';
 import '../../data/models/training_models.dart';
 import '../../data/repositories/training_repository.dart';
+import '../../l10n/generated/app_localizations.dart';
 import '../common/async_view.dart';
 import '../common/section_header.dart';
 
@@ -53,18 +54,19 @@ class _WorkoutSessionViewState extends State<WorkoutSessionView> {
   }
 
   Future<void> _complete() async {
+    final l10n = AppLocalizations.of(context)!;
     final repo = context.read<TrainingRepository>();
     final messenger = ScaffoldMessenger.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Completar entrenamiento'),
-        content: const Text('Esto cerrará la sesión y no podrás añadir más ejercicios.'),
+        title: Text(l10n.workoutSession_completeDialogTitle),
+        content: Text(l10n.workoutSession_completeDialogMessage),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(l10n.common_cancel)),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Completar'),
+            child: Text(l10n.workoutSession_completeButton),
           ),
         ],
       ),
@@ -75,7 +77,7 @@ class _WorkoutSessionViewState extends State<WorkoutSessionView> {
       if (!mounted) return;
       setState(() => _session = updated);
       messenger.showSnackBar(
-        const SnackBar(content: Text('Entrenamiento completado')),
+        SnackBar(content: Text(l10n.workoutSession_completedSnackbar)),
       );
     } on ApiException catch (e) {
       messenger.showSnackBar(
@@ -86,15 +88,16 @@ class _WorkoutSessionViewState extends State<WorkoutSessionView> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: const Text('Sesión')),
+      appBar: AppBar(title: Text(l10n.workoutSession_appBarTitle)),
       body: _session != null
-          ? _body(_session!)
+          ? _body(l10n, _session!)
           : AsyncView<WorkoutSession>(
               future: _future,
               builder: (context, s) {
                 _session = s;
-                return _body(s);
+                return _body(l10n, s);
               },
             ),
       floatingActionButton: _isCompleted
@@ -102,36 +105,36 @@ class _WorkoutSessionViewState extends State<WorkoutSessionView> {
           : FloatingActionButton.extended(
               onPressed: _addExercise,
               icon: const Icon(Icons.add),
-              label: const Text('Ejercicio'),
+              label: Text(l10n.workoutSession_exerciseFabLabel),
             ),
     );
   }
 
-  Widget _body(WorkoutSession s) {
+  Widget _body(AppLocalizations l10n, WorkoutSession s) {
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 88),
       children: [
         _HeaderCard(session: s),
         const SizedBox(height: 16),
         SectionHeader(
-          title: 'Ejercicios',
-          subtitle: '${s.exercises.length} registrados',
+          title: l10n.workoutSession_exercisesSection,
+          subtitle: l10n.workoutSession_registeredCount(s.exercises.length),
           trailing: _isCompleted
               ? null
               : OutlinedButton.icon(
                   onPressed: _complete,
                   icon: const Icon(Icons.check_circle_outline, size: 18),
-                  label: const Text('Completar'),
+                  label: Text(l10n.workoutSession_completeButton),
                 ),
         ),
         const SizedBox(height: 4),
         if (s.exercises.isEmpty)
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 24),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 24),
             child: EmptyStateView(
               icon: Icons.fitness_center_outlined,
-              title: 'Sin ejercicios todavía',
-              subtitle: 'Añade el primero con el botón + Ejercicio.',
+              title: l10n.workoutSession_emptyTitle,
+              subtitle: l10n.workoutSession_emptySubtitle,
             ),
           )
         else
@@ -147,6 +150,7 @@ class _HeaderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -174,16 +178,21 @@ class _HeaderCard extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           Text(
-            'Iniciada ${_fmt(session.startedAt)}'
-            '${session.completedAt != null ? ' · cerrada ${_fmt(session.completedAt!)}' : ''}',
+            l10n.workoutSession_startedAt(_fmt(session.startedAt)) +
+                (session.completedAt != null
+                    ? l10n.workoutSession_closedSuffix(_fmt(session.completedAt!))
+                    : ''),
             style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
           ),
           const SizedBox(height: 12),
           Row(
             children: [
-              _Stat(label: 'Ejercicios', value: session.exercises.length.toString()),
+              _Stat(
+                label: l10n.workoutSession_exercisesSection,
+                value: session.exercises.length.toString(),
+              ),
               const SizedBox(width: 24),
-              _Stat(label: 'Volumen', value: session.totalVolume.toString()),
+              _Stat(label: l10n.workoutSession_volumeStat, value: session.totalVolume.toString()),
             ],
           ),
         ],
@@ -229,10 +238,11 @@ class _StatusChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final (color, label) = switch (status) {
-      'COMPLETED' => (AppColors.success, 'Completado'),
-      'ABANDONED' => (AppColors.error, 'Abandonado'),
-      _ => (AppColors.primary, 'En curso'),
+      'COMPLETED' => (AppColors.success, l10n.workoutSession_statusCompleted),
+      'ABANDONED' => (AppColors.error, l10n.workoutSession_statusAbandoned),
+      _ => (AppColors.primary, l10n.workoutSession_statusInProgress),
     };
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -327,6 +337,7 @@ class _AddExerciseSheetState extends State<_AddExerciseSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final viewInsets = MediaQuery.of(context).viewInsets;
     return Padding(
       padding: EdgeInsets.fromLTRB(20, 16, 20, 20 + viewInsets.bottom),
@@ -336,9 +347,9 @@ class _AddExerciseSheetState extends State<_AddExerciseSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Text(
-              'Añadir ejercicio',
-              style: TextStyle(
+            Text(
+              l10n.workoutSession_addExerciseTitle,
+              style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w800,
                 color: AppColors.textPrimary,
@@ -347,11 +358,12 @@ class _AddExerciseSheetState extends State<_AddExerciseSheet> {
             const SizedBox(height: 16),
             TextFormField(
               controller: _nameCtrl,
-              decoration: const InputDecoration(
-                labelText: 'Nombre del ejercicio',
-                hintText: 'Ej. Press banca',
+              decoration: InputDecoration(
+                labelText: l10n.workoutSession_exerciseNameLabel,
+                hintText: l10n.workoutSession_exerciseNameHint,
               ),
-              validator: (v) => (v == null || v.trim().isEmpty) ? 'Requerido' : null,
+              validator: (v) =>
+                  (v == null || v.trim().isEmpty) ? l10n.common_requiredField : null,
             ),
             const SizedBox(height: 12),
             Row(
@@ -360,8 +372,10 @@ class _AddExerciseSheetState extends State<_AddExerciseSheet> {
                   child: TextFormField(
                     controller: _setsCtrl,
                     keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(labelText: 'Series'),
-                    validator: (v) => (int.tryParse(v ?? '') ?? 0) > 0 ? null : '> 0',
+                    decoration: InputDecoration(labelText: l10n.workoutSession_setsLabel),
+                    validator: (v) => (int.tryParse(v ?? '') ?? 0) > 0
+                        ? null
+                        : l10n.workoutSession_greaterThanZero,
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -369,8 +383,10 @@ class _AddExerciseSheetState extends State<_AddExerciseSheet> {
                   child: TextFormField(
                     controller: _repsCtrl,
                     keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(labelText: 'Reps'),
-                    validator: (v) => (int.tryParse(v ?? '') ?? 0) > 0 ? null : '> 0',
+                    decoration: InputDecoration(labelText: l10n.workoutSession_repsLabel),
+                    validator: (v) => (int.tryParse(v ?? '') ?? 0) > 0
+                        ? null
+                        : l10n.workoutSession_greaterThanZero,
                   ),
                 ),
               ],
@@ -382,7 +398,7 @@ class _AddExerciseSheetState extends State<_AddExerciseSheet> {
                   child: TextFormField(
                     controller: _loadCtrl,
                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    decoration: const InputDecoration(labelText: 'Carga (opcional)'),
+                    decoration: InputDecoration(labelText: l10n.workoutSession_loadLabel),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -390,7 +406,7 @@ class _AddExerciseSheetState extends State<_AddExerciseSheet> {
                   width: 90,
                   child: DropdownButtonFormField<String>(
                     initialValue: _loadUnit,
-                    decoration: const InputDecoration(labelText: 'Unidad'),
+                    decoration: InputDecoration(labelText: l10n.workoutSession_unitLabel),
                     items: const [
                       DropdownMenuItem(value: 'kg', child: Text('kg')),
                       DropdownMenuItem(value: 'lb', child: Text('lb')),
@@ -407,7 +423,7 @@ class _AddExerciseSheetState extends State<_AddExerciseSheet> {
                   child: TextFormField(
                     controller: _durationCtrl,
                     keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(labelText: 'Duración (s)'),
+                    decoration: InputDecoration(labelText: l10n.workoutSession_durationLabel),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -415,13 +431,16 @@ class _AddExerciseSheetState extends State<_AddExerciseSheet> {
                   child: TextFormField(
                     controller: _restCtrl,
                     keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(labelText: 'Descanso (s)'),
+                    decoration: InputDecoration(labelText: l10n.workoutSession_restLabel),
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 20),
-            ElevatedButton(onPressed: _submit, child: const Text('Añadir')),
+            ElevatedButton(
+              onPressed: _submit,
+              child: Text(l10n.workoutSession_addButton),
+            ),
           ],
         ),
       ),

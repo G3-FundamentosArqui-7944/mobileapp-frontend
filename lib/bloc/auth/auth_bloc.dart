@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../data/api/api_client.dart';
 import '../../data/models/auth_models.dart';
 import '../../data/repositories/auth_repository.dart';
+import '../../l10n/generated/app_localizations.dart';
+import '../../providers/locale_controller.dart';
 import 'auth_event.dart';
 import 'auth_state.dart';
 
@@ -11,12 +13,17 @@ export 'auth_state.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final AuthRepository _repo;
+  final LocaleController _localeController;
 
   /// Recibe los `ApiClient` activos (microservicios y monolito) para enganchar
   /// el callback de sesión expirada en todos: cualquier 401 cuyo refresh falle
   /// debe terminar en logout, sin importar qué backend lo devolvió.
-  AuthBloc({required AuthRepository repository, required List<ApiClient> apiClients})
-      : _repo = repository,
+  AuthBloc({
+    required AuthRepository repository,
+    required List<ApiClient> apiClients,
+    required LocaleController localeController,
+  })  : _repo = repository,
+        _localeController = localeController,
         super(const AuthInitial()) {
     on<AuthInitialized>(_onInitialized);
     on<AuthSignInRequested>(_onSignIn);
@@ -78,19 +85,21 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   Future<void> _onSessionExpired(AuthSessionExpired event, Emitter<AuthState> emit) async {
     await _repo.signOut();
-    emit(const AuthUnauthenticated(message: 'Tu sesión expiró. Inicia sesión nuevamente.'));
+    emit(AuthUnauthenticated(message: _l10n.auth_sessionExpired));
   }
+
+  AppLocalizations get _l10n => lookupAppLocalizations(_localeController.locale);
 
   String _friendly(ApiException e) {
     switch (e.statusCode) {
       case 400:
-        return 'Datos inválidos. Revisa la información.';
+        return _l10n.auth_invalidData;
       case 401:
-        return 'Credenciales incorrectas.';
+        return _l10n.auth_invalidCredentials;
       case 404:
-        return 'No encontramos una cuenta con ese correo.';
+        return _l10n.auth_accountNotFound;
       case 409:
-        return 'Ese correo ya está registrado.';
+        return _l10n.auth_emailAlreadyRegistered;
       default:
         return e.message;
     }

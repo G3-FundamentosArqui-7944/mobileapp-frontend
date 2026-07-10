@@ -9,6 +9,8 @@ import '../../constants/app_colors.dart';
 import '../../data/api/api_client.dart';
 import '../../data/models/nutrition_models.dart';
 import '../../data/repositories/nutrition_repository.dart';
+import '../../l10n/generated/app_localizations.dart';
+import '../../providers/locale_controller.dart';
 import '../common/async_view.dart';
 import '../common/section_header.dart';
 import 'nutrition_analysis_view.dart';
@@ -24,6 +26,7 @@ class NutritionView extends StatefulWidget {
 
 class _NutritionViewState extends State<NutritionView> {
   late Future<_NutritionDashboard> _future;
+  bool _analyzing = false;
 
   @override
   void initState() {
@@ -47,6 +50,8 @@ class _NutritionViewState extends State<NutritionView> {
   }
 
   Future<void> _pickAndAnalyze() async {
+    if (_analyzing) return;
+    final l10n = AppLocalizations.of(context)!;
     final picker = ImagePicker();
     final source = await showModalBottomSheet<ImageSource>(
       context: context,
@@ -56,12 +61,12 @@ class _NutritionViewState extends State<NutritionView> {
           children: [
             ListTile(
               leading: const Icon(Icons.camera_alt),
-              title: const Text('Tomar foto del plato'),
+              title: Text(l10n.nutrition_takePhoto),
               onTap: () => Navigator.pop(ctx, ImageSource.camera),
             ),
             ListTile(
               leading: const Icon(Icons.photo_library),
-              title: const Text('Elegir de la galería'),
+              title: Text(l10n.nutrition_chooseFromGallery),
               onTap: () => Navigator.pop(ctx, ImageSource.gallery),
             ),
           ],
@@ -72,12 +77,20 @@ class _NutritionViewState extends State<NutritionView> {
     final picked = await picker.pickImage(source: source, imageQuality: 85);
     if (picked == null || !mounted) return;
 
+    setState(() => _analyzing = true);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(l10n.nutrition_analyzingSnackbar),
+        duration: const Duration(seconds: 30),
+      ),
+    );
     try {
       final analysis = await context.read<NutritionRepository>().analyzeImage(
             userId: widget.userId,
             image: File(picked.path),
           );
       if (!mounted) return;
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
       Navigator.of(context).push(
         MaterialPageRoute(
           builder: (_) => NutritionAnalysisDetailView(
@@ -89,20 +102,40 @@ class _NutritionViewState extends State<NutritionView> {
       setState(_load);
     } on ApiException catch (e) {
       if (!mounted) return;
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(e.message), backgroundColor: AppColors.error),
       );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(l10n.nutrition_analyzeFailed(e.toString())),
+          backgroundColor: AppColors.error,
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _analyzing = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final intlLocale = context.watch<LocaleController>().intlLocaleCode;
     return Scaffold(
       backgroundColor: Colors.transparent,
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: _pickAndAnalyze,
-        icon: const Icon(Icons.restaurant_menu),
-        label: const Text('Analizar comida'),
+        onPressed: _analyzing ? null : _pickAndAnalyze,
+        icon: _analyzing
+            ? const SizedBox(
+                width: 18,
+                height: 18,
+                child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+              )
+            : const Icon(Icons.restaurant_menu),
+        label: Text(_analyzing ? l10n.nutrition_analyzingButton : l10n.nutrition_analyzeButton),
       ),
       body: RefreshIndicator(
         onRefresh: () async => setState(_load),
@@ -113,9 +146,9 @@ class _NutritionViewState extends State<NutritionView> {
             return ListView(
               padding: const EdgeInsets.fromLTRB(20, 20, 20, 100),
               children: [
-                const Text(
-                  'Hoy',
-                  style: TextStyle(
+                Text(
+                  l10n.nutrition_todayTitle,
+                  style: const TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.w800,
                     color: AppColors.textPrimary,
@@ -128,29 +161,30 @@ class _NutritionViewState extends State<NutritionView> {
                 ),
                 const SizedBox(height: 20),
                 if (data.plan != null) ...[
-                  const SectionHeader(title: 'Plan activo'),
+                  SectionHeader(title: l10n.nutrition_activePlanSection),
                   Card(
                     child: ListTile(
                       leading: const Icon(Icons.flag, color: AppColors.accent),
                       title: Text(data.plan!.name),
                       subtitle: Text(
-                        'Hasta ${DateFormat('d MMM y', 'es_PE').format(data.plan!.endDate ?? DateTime.now().add(const Duration(days: 30)))}',
+                        l10n.nutrition_planUntil(DateFormat('d MMM y', intlLocale).format(
+                            data.plan!.endDate ?? DateTime.now().add(const Duration(days: 30)))),
                       ),
                     ),
                   ),
                   const SizedBox(height: 16),
                 ],
-                const SectionHeader(title: 'Comidas de hoy'),
+                SectionHeader(title: l10n.nutrition_todaysMealsSection),
                 if (data.meals.isEmpty)
-                  const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 16),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
                     child: Text(
-                      'Aún no registraste ninguna comida.',
-                      style: TextStyle(color: AppColors.textSecondary),
+                      l10n.nutrition_noMealsLogged,
+                      style: const TextStyle(color: AppColors.textSecondary),
                     ),
                   )
                 else
-                  ...data.meals.map(_buildMealCard),
+                  ...data.meals.map((m) => _buildMealCard(l10n, m)),
               ],
             );
           },
@@ -159,7 +193,7 @@ class _NutritionViewState extends State<NutritionView> {
     );
   }
 
-  Widget _buildMealCard(MealRecord m) {
+  Widget _buildMealCard(AppLocalizations l10n, MealRecord m) {
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       child: ListTile(
@@ -168,7 +202,7 @@ class _NutritionViewState extends State<NutritionView> {
           child: Icon(Icons.restaurant, color: Colors.white),
         ),
         title: Text(
-          m.description ?? _mealLabel(m.mealType),
+          m.description ?? _mealLabel(l10n, m.mealType),
           style: const TextStyle(fontWeight: FontWeight.w700),
         ),
         subtitle: Text(
@@ -185,16 +219,16 @@ class _NutritionViewState extends State<NutritionView> {
     );
   }
 
-  String _mealLabel(String type) {
+  String _mealLabel(AppLocalizations l10n, String type) {
     switch (type) {
       case 'BREAKFAST':
-        return 'Desayuno';
+        return l10n.nutrition_mealBreakfast;
       case 'LUNCH':
-        return 'Almuerzo';
+        return l10n.nutrition_mealLunch;
       case 'DINNER':
-        return 'Cena';
+        return l10n.nutrition_mealDinner;
       case 'SNACK':
-        return 'Snack';
+        return l10n.nutrition_mealSnack;
       default:
         return type;
     }
@@ -220,6 +254,7 @@ class _MacroCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -232,8 +267,8 @@ class _MacroCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Text('Calorías',
-                  style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
+              Text(l10n.nutrition_caloriesLabel,
+                  style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
               const Spacer(),
               Text(
                 '${consumed.calories.toStringAsFixed(0)} / ${target.calories.toStringAsFixed(0)} kcal',
@@ -256,11 +291,26 @@ class _MacroCard extends StatelessWidget {
           const SizedBox(height: 16),
           Row(
             children: [
-              _MacroChip(label: 'Proteína', value: consumed.proteinGrams, target: target.proteinGrams, color: AppColors.coachAccent),
+              _MacroChip(
+                label: l10n.nutrition_proteinLabel,
+                value: consumed.proteinGrams,
+                target: target.proteinGrams,
+                color: AppColors.coachAccent,
+              ),
               const SizedBox(width: 8),
-              _MacroChip(label: 'Carbos', value: consumed.carbohydratesGrams, target: target.carbohydratesGrams, color: AppColors.warning),
+              _MacroChip(
+                label: l10n.nutrition_carbsLabel,
+                value: consumed.carbohydratesGrams,
+                target: target.carbohydratesGrams,
+                color: AppColors.warning,
+              ),
               const SizedBox(width: 8),
-              _MacroChip(label: 'Grasas', value: consumed.fatGrams, target: target.fatGrams, color: AppColors.accent),
+              _MacroChip(
+                label: l10n.nutrition_fatLabel,
+                value: consumed.fatGrams,
+                target: target.fatGrams,
+                color: AppColors.accent,
+              ),
             ],
           ),
         ],
@@ -283,6 +333,7 @@ class _MacroChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Expanded(
       child: Container(
         padding: const EdgeInsets.all(10),
@@ -306,7 +357,7 @@ class _MacroChip extends StatelessWidget {
               style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
             ),
             Text(
-              'meta ${target.toStringAsFixed(0)}',
+              l10n.nutrition_targetLabel(target.toStringAsFixed(0)),
               style: const TextStyle(fontSize: 10, color: AppColors.textMuted),
             ),
           ],

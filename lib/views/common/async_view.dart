@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../constants/app_colors.dart';
+import '../../l10n/generated/app_localizations.dart';
 
 /// Helper para construir vistas a partir de un Future:
 /// muestra spinner, error con retry, o el contenido.
@@ -38,6 +39,7 @@ class _ErrorState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -46,9 +48,9 @@ class _ErrorState extends StatelessWidget {
           children: [
             const Icon(Icons.cloud_off_rounded, size: 56, color: AppColors.error),
             const SizedBox(height: 12),
-            const Text(
-              'No pudimos cargar la información',
-              style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
+            Text(
+              l10n.common_couldNotLoad,
+              style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
             ),
             const SizedBox(height: 6),
             Text(
@@ -61,7 +63,7 @@ class _ErrorState extends StatelessWidget {
               OutlinedButton.icon(
                 onPressed: onRetry,
                 icon: const Icon(Icons.refresh),
-                label: const Text('Reintentar'),
+                label: Text(l10n.common_retry),
               ),
             ],
           ],

@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../bloc/auth/auth_bloc.dart';
 import '../../constants/app_colors.dart';
+import '../../l10n/generated/app_localizations.dart';
 import '../home/home_view.dart';
 import 'sign_in_view.dart';
 
@@ -45,18 +46,19 @@ class _SplashViewState extends State<SplashView> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return BlocListener<AuthBloc, AuthState>(
       listenWhen: (prev, curr) => prev.runtimeType != curr.runtimeType,
       listener: (context, state) => _navigate(state),
-      child: const Scaffold(
+      child: Scaffold(
         backgroundColor: AppColors.backgroundDark,
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.fitness_center, size: 72, color: AppColors.primary),
-              SizedBox(height: 16),
-              Text(
+              const Icon(Icons.fitness_center, size: 72, color: AppColors.primary),
+              const SizedBox(height: 16),
+              const Text(
                 'BodyMatch',
                 style: TextStyle(
                   color: AppColors.textOnPrimary,
@@ -65,13 +67,13 @@ class _SplashViewState extends State<SplashView> {
                   letterSpacing: 1.2,
                 ),
               ),
-              SizedBox(height: 6),
+              const SizedBox(height: 6),
               Text(
-                'AI fitness coaching',
-                style: TextStyle(color: AppColors.textMuted, fontSize: 14),
+                l10n.splash_tagline,
+                style: const TextStyle(color: AppColors.textMuted, fontSize: 14),
               ),
-              SizedBox(height: 40),
-              CircularProgressIndicator(color: AppColors.primary),
+              const SizedBox(height: 40),
+              const CircularProgressIndicator(color: AppColors.primary),
             ],
           ),
         ),

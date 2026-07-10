@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../bloc/auth/auth_bloc.dart';
 import '../../constants/app_colors.dart';
 import '../../data/models/auth_models.dart';
+import '../../l10n/generated/app_localizations.dart';
 import '../auth/sign_in_view.dart';
 import '../coach/coach_agenda_view.dart';
 import '../coach/coach_clients_view.dart';
@@ -31,8 +32,9 @@ class _HomeViewState extends State<HomeView> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final isCoach = widget.user.isCoach && !widget.user.isAthlete;
-    final tabs = isCoach ? _coachTabs(widget.user) : _athleteTabs(widget.user);
+    final tabs = isCoach ? _coachTabs(l10n, widget.user) : _athleteTabs(l10n, widget.user);
 
     return BlocListener<AuthBloc, AuthState>(
       listenWhen: (prev, curr) => curr is AuthUnauthenticated,
@@ -65,20 +67,23 @@ class _HomeViewState extends State<HomeView> {
     );
   }
 
-  List<_Tab> _athleteTabs(AuthenticatedUser u) => [
-        _Tab('Inicio', Icons.home_rounded, (_) => AthleteHomeView(user: u)),
-        _Tab('Coaches', Icons.search_rounded, (_) => CoachSearchView(athleteId: u.id)),
-        _Tab('Análisis IA', Icons.videocam_rounded, (_) => VideoAnalysisView(userId: u.id)),
-        _Tab('Nutrición', Icons.restaurant_rounded, (_) => NutritionView(userId: u.id)),
-        _Tab('Perfil', Icons.person_rounded, (_) => ProfileView(user: u)),
+  List<_Tab> _athleteTabs(AppLocalizations l10n, AuthenticatedUser u) => [
+        _Tab(l10n.home_tabHome, Icons.home_rounded, (_) => AthleteHomeView(user: u)),
+        _Tab(l10n.home_tabCoaches, Icons.search_rounded, (_) => CoachSearchView(athleteId: u.id)),
+        _Tab(l10n.home_tabAiAnalysis, Icons.videocam_rounded,
+            (_) => VideoAnalysisView(userId: u.id)),
+        _Tab(l10n.home_tabNutrition, Icons.restaurant_rounded,
+            (_) => NutritionView(userId: u.id)),
+        _Tab(l10n.home_tabProfile, Icons.person_rounded, (_) => ProfileView(user: u)),
       ];
 
-  List<_Tab> _coachTabs(AuthenticatedUser u) => [
-        _Tab('Inicio', Icons.home_rounded, (_) => CoachHomeView(coach: u)),
-        _Tab('Clientes', Icons.group_rounded, (_) => CoachClientsView(coachId: u.id)),
-        _Tab('Agenda', Icons.calendar_month_rounded, (_) => CoachAgendaView(coachId: u.id)),
-        _Tab('Mensajes', Icons.chat_bubble_outline, (_) => const CoachMessagesView()),
-        _Tab('Perfil', Icons.person_rounded, (_) => ProfileView(user: u)),
+  List<_Tab> _coachTabs(AppLocalizations l10n, AuthenticatedUser u) => [
+        _Tab(l10n.home_tabHome, Icons.home_rounded, (_) => CoachHomeView(coach: u)),
+        _Tab(l10n.home_tabClients, Icons.group_rounded, (_) => CoachClientsView(coachId: u.id)),
+        _Tab(l10n.home_tabAgenda, Icons.calendar_month_rounded,
+            (_) => CoachAgendaView(coachId: u.id)),
+        _Tab(l10n.home_tabMessages, Icons.chat_bubble_outline, (_) => const CoachMessagesView()),
+        _Tab(l10n.home_tabProfile, Icons.person_rounded, (_) => ProfileView(user: u)),
       ];
 }
 

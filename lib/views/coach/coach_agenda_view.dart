@@ -6,8 +6,32 @@ import '../../constants/app_colors.dart';
 import '../../data/api/api_client.dart';
 import '../../data/models/matchmaking_models.dart';
 import '../../data/repositories/coaches_repository.dart';
+import '../../data/repositories/profiles_repository.dart';
 import '../../data/repositories/training_sessions_repository.dart';
+import '../../l10n/generated/app_localizations.dart';
+import '../../providers/locale_controller.dart';
 import '../common/async_view.dart';
+
+String dayOfWeekLabel(AppLocalizations l10n, String code) {
+  switch (code) {
+    case 'MONDAY':
+      return l10n.day_monday;
+    case 'TUESDAY':
+      return l10n.day_tuesday;
+    case 'WEDNESDAY':
+      return l10n.day_wednesday;
+    case 'THURSDAY':
+      return l10n.day_thursday;
+    case 'FRIDAY':
+      return l10n.day_friday;
+    case 'SATURDAY':
+      return l10n.day_saturday;
+    case 'SUNDAY':
+      return l10n.day_sunday;
+    default:
+      return code;
+  }
+}
 
 /// Coach: sesiones agendadas + agregar disponibilidad.
 class CoachAgendaView extends StatefulWidget {
@@ -20,6 +44,7 @@ class CoachAgendaView extends StatefulWidget {
 
 class _CoachAgendaViewState extends State<CoachAgendaView> {
   late Future<List<TrainingSession>> _future;
+  CoachProfile? _coachProfile;
 
   @override
   void initState() {
@@ -29,6 +54,9 @@ class _CoachAgendaViewState extends State<CoachAgendaView> {
 
   void _load() {
     _future = context.read<TrainingSessionsRepository>().byCoach(widget.coachId);
+    context.read<ProfilesRepository>().getCoachByUserId(widget.coachId).then((profile) {
+      if (mounted) setState(() => _coachProfile = profile);
+    });
   }
 
   Future<void> _addAvailability() async {
@@ -38,10 +66,12 @@ class _CoachAgendaViewState extends State<CoachAgendaView> {
     );
     if (result == null || !mounted) return;
     try {
-      await context.read<CoachesRepository>().addAvailability(widget.coachId, result);
+      final updated =
+          await context.read<CoachesRepository>().addAvailability(widget.coachId, result);
       if (!mounted) return;
+      setState(() => _coachProfile = updated);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Disponibilidad agregada')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.coachAgenda_availabilityAdded)),
       );
     } on ApiException catch (e) {
       if (!mounted) return;
@@ -55,7 +85,9 @@ class _CoachAgendaViewState extends State<CoachAgendaView> {
     try {
       await context.read<TrainingSessionsRepository>().complete(s.id);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Sesión cerrada')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(AppLocalizations.of(context)!.coachAgenda_sessionClosed)),
+      );
       setState(_load);
     } on ApiException catch (e) {
       if (!mounted) return;
@@ -67,12 +99,14 @@ class _CoachAgendaViewState extends State<CoachAgendaView> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final intlLocale = context.watch<LocaleController>().intlLocaleCode;
     return Scaffold(
       backgroundColor: Colors.transparent,
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _addAvailability,
         icon: const Icon(Icons.add),
-        label: const Text('Disponibilidad'),
+        label: Text(l10n.coachAgenda_fabLabel),
       ),
       body: RefreshIndicator(
         onRefresh: () async => setState(_load),
@@ -80,45 +114,79 @@ class _CoachAgendaViewState extends State<CoachAgendaView> {
           future: _future,
           onRetry: () => setState(_load),
           builder: (context, sessions) {
-            if (sessions.isEmpty) {
-              return const EmptyStateView(
-                icon: Icons.calendar_month_outlined,
-                title: 'Sin sesiones agendadas',
-                subtitle: 'Agrega disponibilidad para que los atletas reserven contigo.',
-              );
-            }
             sessions.sort((a, b) => a.scheduledAt.compareTo(b.scheduledAt));
-            return ListView.separated(
+            final slots = _coachProfile?.availabilitySlots ?? const <AvailabilitySlot>[];
+            return ListView(
               padding: const EdgeInsets.fromLTRB(20, 20, 20, 100),
-              itemCount: sessions.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 8),
-              itemBuilder: (_, i) {
-                final s = sessions[i];
-                final isPast = s.scheduledAt.isBefore(DateTime.now());
-                final canComplete = !isPast && s.status == 'SCHEDULED';
-                return Card(
-                  child: ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor: _statusColor(s.status),
-                      child: const Icon(Icons.fitness_center, color: Colors.white),
+              children: [
+                Text(
+                  l10n.coachAgenda_weeklyAvailabilityTitle,
+                  style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
+                ),
+                const SizedBox(height: 8),
+                if (slots.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    child: Text(
+                      l10n.coachAgenda_noAvailabilityYet,
+                      style: const TextStyle(color: AppColors.textSecondary),
                     ),
-                    title: Text(
-                      DateFormat("EEEE d 'de' MMMM, HH:mm", 'es_PE').format(s.scheduledAt),
-                      style: const TextStyle(fontWeight: FontWeight.w700),
+                  )
+                else
+                  ...slots.map((slot) => Card(
+                        margin: const EdgeInsets.only(bottom: 8),
+                        child: ListTile(
+                          leading: const Icon(Icons.event_available, color: AppColors.primary),
+                          title: Text(dayOfWeekLabel(l10n, slot.dayOfWeek)),
+                          subtitle: Text(
+                            '${slot.startTime.substring(0, 5)} - ${slot.endTime.substring(0, 5)}',
+                          ),
+                        ),
+                      )),
+                const SizedBox(height: 20),
+                Text(
+                  l10n.coachAgenda_scheduledSessionsTitle,
+                  style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
+                ),
+                const SizedBox(height: 8),
+                if (sessions.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    child: Text(
+                      l10n.coachAgenda_addAvailabilityPrompt,
+                      style: const TextStyle(color: AppColors.textSecondary),
                     ),
-                    subtitle: Text(
-                      'Atleta #${s.athleteId} · ${s.durationMinutes} min · ${s.status}',
-                    ),
-                    trailing: canComplete
-                        ? IconButton(
-                            tooltip: 'Marcar como completada',
-                            icon: const Icon(Icons.check, color: AppColors.success),
-                            onPressed: () => _completeSession(s),
-                          )
-                        : null,
-                  ),
-                );
-              },
+                  )
+                else
+                  ...sessions.map((s) {
+                    final isPast = s.scheduledAt.isBefore(DateTime.now());
+                    final canComplete = !isPast && s.status == 'SCHEDULED';
+                    return Card(
+                      margin: const EdgeInsets.only(bottom: 8),
+                      child: ListTile(
+                        leading: CircleAvatar(
+                          backgroundColor: _statusColor(s.status),
+                          child: const Icon(Icons.fitness_center, color: Colors.white),
+                        ),
+                        title: Text(
+                          DateFormat("EEEE d 'de' MMMM, HH:mm", intlLocale).format(s.scheduledAt),
+                          style: const TextStyle(fontWeight: FontWeight.w700),
+                        ),
+                        subtitle: Text(
+                          l10n.coachAgenda_athleteSessionInfo(
+                              s.athleteId, s.durationMinutes, s.status),
+                        ),
+                        trailing: canComplete
+                            ? IconButton(
+                                tooltip: l10n.coachAgenda_markCompletedTooltip,
+                                icon: const Icon(Icons.check, color: AppColors.success),
+                                onPressed: () => _completeSession(s),
+                              )
+                            : null,
+                      ),
+                    );
+                  }),
+              ],
             );
           },
         ),
@@ -160,38 +228,29 @@ class _AddAvailabilityDialogState extends State<_AddAvailabilityDialog> {
     'SUNDAY',
   ];
 
-  static const _labels = {
-    'MONDAY': 'Lunes',
-    'TUESDAY': 'Martes',
-    'WEDNESDAY': 'Miércoles',
-    'THURSDAY': 'Jueves',
-    'FRIDAY': 'Viernes',
-    'SATURDAY': 'Sábado',
-    'SUNDAY': 'Domingo',
-  };
-
   String _fmt(TimeOfDay t) =>
       '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}:00';
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return AlertDialog(
-      title: const Text('Nueva disponibilidad'),
+      title: Text(l10n.coachAgenda_newAvailabilityTitle),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           DropdownButtonFormField<String>(
             initialValue: _day,
             items: _days
-                .map((d) => DropdownMenuItem(value: d, child: Text(_labels[d]!)))
+                .map((d) => DropdownMenuItem(value: d, child: Text(dayOfWeekLabel(l10n, d))))
                 .toList(),
             onChanged: (v) => setState(() => _day = v ?? 'MONDAY'),
-            decoration: const InputDecoration(labelText: 'Día'),
+            decoration: InputDecoration(labelText: l10n.coachAgenda_dayLabel),
           ),
           const SizedBox(height: 12),
           ListTile(
             contentPadding: EdgeInsets.zero,
-            title: Text('Inicio: ${_start.format(context)}'),
+            title: Text(l10n.coachAgenda_startLabel(_start.format(context))),
             trailing: const Icon(Icons.access_time),
             onTap: () async {
               final t = await showTimePicker(context: context, initialTime: _start);
@@ -200,7 +259,7 @@ class _AddAvailabilityDialogState extends State<_AddAvailabilityDialog> {
           ),
           ListTile(
             contentPadding: EdgeInsets.zero,
-            title: Text('Fin: ${_end.format(context)}'),
+            title: Text(l10n.coachAgenda_endLabel(_end.format(context))),
             trailing: const Icon(Icons.access_time),
             onTap: () async {
               final t = await showTimePicker(context: context, initialTime: _end);
@@ -210,7 +269,7 @@ class _AddAvailabilityDialogState extends State<_AddAvailabilityDialog> {
         ],
       ),
       actions: [
-        TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancelar')),
+        TextButton(onPressed: () => Navigator.pop(context), child: Text(l10n.common_cancel)),
         ElevatedButton(
           onPressed: () => Navigator.pop(
             context,
@@ -220,7 +279,7 @@ class _AddAvailabilityDialogState extends State<_AddAvailabilityDialog> {
               endTime: _fmt(_end),
             ),
           ),
-          child: const Text('Guardar'),
+          child: Text(l10n.coachAgenda_saveButton),
         ),
       ],
     );

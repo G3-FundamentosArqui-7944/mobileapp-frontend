@@ -7,6 +7,9 @@ import '../../data/api/api_client.dart';
 import '../../data/models/matchmaking_models.dart';
 import '../../data/repositories/connection_requests_repository.dart';
 import '../../data/repositories/training_sessions_repository.dart';
+import '../../l10n/generated/app_localizations.dart';
+import '../../providers/locale_controller.dart';
+import '../coach/coach_agenda_view.dart' show dayOfWeekLabel;
 import 'coach_search_view.dart' show specialtyLabel;
 
 /// Detalle del coach con acciones: solicitar conexión + agendar sesión.
@@ -24,21 +27,25 @@ class _CoachDetailViewState extends State<CoachDetailView> {
   bool _busy = false;
 
   Future<void> _requestConnection() async {
+    final l10n = AppLocalizations.of(context)!;
     final messageCtrl = TextEditingController();
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Solicitar coaching'),
+        title: Text(l10n.coachDetail_requestDialogTitle),
         content: TextField(
           controller: messageCtrl,
           maxLines: 3,
-          decoration: const InputDecoration(
-            hintText: '¿Por qué quieres entrenar con este coach?',
+          decoration: InputDecoration(
+            hintText: l10n.coachDetail_requestDialogHint,
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
-          ElevatedButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Enviar')),
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(l10n.common_cancel)),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(l10n.coachDetail_sendButton),
+          ),
         ],
       ),
     );
@@ -54,7 +61,7 @@ class _CoachDetailViewState extends State<CoachDetailView> {
           );
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Solicitud enviada al coach')),
+        SnackBar(content: Text(l10n.coachDetail_requestSentSnackbar)),
       );
     } on ApiException catch (e) {
       if (!mounted) return;
@@ -67,6 +74,8 @@ class _CoachDetailViewState extends State<CoachDetailView> {
   }
 
   Future<void> _scheduleSession() async {
+    final l10n = AppLocalizations.of(context)!;
+    final intlLocale = context.read<LocaleController>().intlLocaleCode;
     final now = DateTime.now();
     final date = await showDatePicker(
       context: context,
@@ -96,15 +105,14 @@ class _CoachDetailViewState extends State<CoachDetailView> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Sesión agendada para ${DateFormat('dd MMM, HH:mm', 'es_PE').format(scheduledAt)}',
+            l10n.coachDetail_sessionScheduledFor(
+                DateFormat('dd MMM, HH:mm', intlLocale).format(scheduledAt)),
           ),
         ),
       );
     } on ApiException catch (e) {
       if (!mounted) return;
-      final msg = e.statusCode == 409
-          ? 'Ese horario ya no está disponible.'
-          : e.message;
+      final msg = e.statusCode == 409 ? l10n.coachDetail_slotUnavailable : e.message;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(msg), backgroundColor: AppColors.error),
       );
@@ -116,8 +124,9 @@ class _CoachDetailViewState extends State<CoachDetailView> {
   @override
   Widget build(BuildContext context) {
     final c = widget.coach;
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: Text('Coach #${c.userId}')),
+      appBar: AppBar(title: Text(l10n.coachSearch_coachIdLabel(c.userId))),
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
@@ -131,7 +140,7 @@ class _CoachDetailViewState extends State<CoachDetailView> {
           const SizedBox(height: 12),
           Center(
             child: Text(
-              '${c.yearsOfExperience} años de experiencia',
+              l10n.coachDetail_yearsExperience(c.yearsOfExperience),
               style: const TextStyle(color: AppColors.textSecondary),
             ),
           ),
@@ -144,45 +153,45 @@ class _CoachDetailViewState extends State<CoachDetailView> {
               ),
             ),
           const SizedBox(height: 12),
-          const Text('Especialidades',
-              style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
+          Text(l10n.coachDetail_specialtiesTitle,
+              style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
           const SizedBox(height: 8),
           Wrap(
             spacing: 8,
             runSpacing: 8,
             children: c.specialties
                 .map((s) => Chip(
-                      label: Text(specialtyLabel(s)),
+                      label: Text(specialtyLabel(l10n, s)),
                       backgroundColor: AppColors.primary.withValues(alpha: 0.1),
                     ))
                 .toList(),
           ),
           const SizedBox(height: 16),
-          const Text('Disponibilidad',
-              style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
+          Text(l10n.coachDetail_availabilityTitle,
+              style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
           const SizedBox(height: 8),
           if (c.availabilitySlots.isEmpty)
-            const Text('El coach aún no publicó horarios.',
-                style: TextStyle(color: AppColors.textSecondary))
+            Text(l10n.coachDetail_noAvailabilityPublished,
+                style: const TextStyle(color: AppColors.textSecondary))
           else
             ...c.availabilitySlots.map(
               (s) => ListTile(
                 contentPadding: EdgeInsets.zero,
                 leading: const Icon(Icons.schedule, color: AppColors.coachAccent),
-                title: Text('${s.dayOfWeek} · ${s.startTime} – ${s.endTime}'),
+                title: Text('${dayOfWeekLabel(l10n, s.dayOfWeek)} · ${s.startTime} – ${s.endTime}'),
               ),
             ),
           const SizedBox(height: 24),
           ElevatedButton.icon(
             onPressed: _busy ? null : _requestConnection,
             icon: const Icon(Icons.handshake_outlined),
-            label: const Text('Solicitar coaching'),
+            label: Text(l10n.coachDetail_requestCoachingButton),
           ),
           const SizedBox(height: 10),
           OutlinedButton.icon(
             onPressed: _busy ? null : _scheduleSession,
             icon: const Icon(Icons.calendar_month),
-            label: const Text('Agendar sesión'),
+            label: Text(l10n.coachDetail_scheduleSessionButton),
           ),
         ],
       ),
