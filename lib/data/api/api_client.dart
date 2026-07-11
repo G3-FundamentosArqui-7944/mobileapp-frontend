@@ -105,6 +105,7 @@ class ApiClient {
         if (token != null) request.headers['Authorization'] = 'Bearer $token';
       }
       request.headers['Accept'] = 'application/json';
+      request.headers['ngrok-skip-browser-warning'] = 'true';
       request.fields.addAll(fields);
       request.files.add(await http.MultipartFile.fromPath(
         fileFieldName,
@@ -141,6 +142,8 @@ class ApiClient {
     final headers = <String, String>{
       'Content-Type': 'application/json',
       'Accept': 'application/json',
+      // Evita la página de advertencia interstitial de ngrok free tier.
+      'ngrok-skip-browser-warning': 'true',
     };
     if (auth) {
       final token = await _tokenManager.getAccessToken();
@@ -224,7 +227,11 @@ class ApiClient {
       final response = await _http
           .post(
             uri,
-            headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+              'ngrok-skip-browser-warning': 'true',
+            },
             body: jsonEncode({'refreshToken': refreshToken}),
           )
           .timeout(AppConfig.defaultTimeout);

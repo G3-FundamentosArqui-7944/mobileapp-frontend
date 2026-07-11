@@ -9,7 +9,7 @@
 /// a qué bounded context pertenezcan; el refresh-token va siempre a microservicios
 /// porque IAM emite y persiste los refresh tokens.
 class AppConfig {
-  static const Environment currentEnvironment = Environment.physicalDevice;
+  static const Environment currentEnvironment = Environment.production;
 
   static const int _microservicesPort = 8080;
   static const int _monolithPort = 8091;
@@ -39,7 +39,9 @@ class AppConfig {
         // Si en vez de USB usas la misma red WiFi, cambia esto por la IP LAN de la PC.
         return 'http://127.0.0.1:$port/api/v1';
       case Environment.production:
-        return 'https://api.bodymatch.ai/api/v1';
+        // Túnel ngrok temporal hacia el api-gateway local mientras no hay un
+        // deploy persistente en la nube. Cambia esto cuando migren a Oracle/Render.
+        return 'https://untoasted-slimy-caress.ngrok-free.dev/api/v1';
     }
   }
 
